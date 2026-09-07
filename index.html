@@ -112,26 +112,45 @@
             box-shadow: 0 10px 25px rgba(129, 199, 132, 0.5);
         }
         
-        #menu, #upgradeModal {
+        #menu, #upgradeModal, #pauseModal, #adminModal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, rgba(27, 94, 32, 0.95), rgba(10, 36, 12, 0.95));
-            padding: 40px;
+            padding: 30px;
             border-radius: 20px;
             border: 4px solid #81c784;
             text-align: center;
             pointer-events: auto;
             color: white;
             box-shadow: 0 0 30px rgba(76, 175, 80, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
-            z-index: 20;
+            z-index: 30;
             backdrop-filter: blur(5px);
             max-width: 90vw;
+        }
+
+        #adminModal {
+            z-index: 40;
+            width: 480px;
+            max-height: 85vh;
+            overflow-y: auto;
         }
         
         .title-glow {
             text-shadow: 0 0 10px #81c784, 0 0 20px #4caf50, 0 0 30px #388e3c;
+        }
+
+        .admin-btn {
+            background: linear-gradient(to bottom, #f59e0b, #d97706);
+            border-color: #fde047;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            margin-top: 5px;
+        }
+
+        .admin-btn:hover {
+            background: linear-gradient(to bottom, #fbbf24, #f59e0b);
         }
 
         button {
@@ -190,7 +209,10 @@
             </div>
             
             <div class="hud-text flex flex-col items-end">
-                <span class="mb-1 text-base">FRESHNESS</span>
+                <div class="flex items-center gap-2 mb-1">
+                    <button id="pauseBtn" onclick="togglePause()" class="!mt-0 !py-1 !px-3 !text-xs !bg-yellow-600 hover:!bg-yellow-500 border border-yellow-300">⏸ PAUSE (P)</button>
+                    <span class="text-base">FRESHNESS</span>
+                </div>
                 <div class="w-64 h-7 bg-black border-4 border-green-900 rounded-full overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.8)]">
                     <div id="healthBar" class="h-full bg-gradient-to-r from-green-600 via-green-400 to-green-300 w-full transition-all duration-100 ease-out"></div>
                 </div>
@@ -211,7 +233,7 @@
                 </div>
                 <div class="weapon-slot locked" id="wep-2" onclick="switchWeapon(2)">
                     <div class="text-xs text-yellow-300">[3]</div>
-                    <div class="text-xs sm:text-sm font-black" id="wep-name-2">🔒 RELISH MORTAR</div>
+                    <div class="text-xs sm:text-sm font-black" id="wep-name-2">🔒 RELISH FLAMETHROWER</div>
                 </div>
                 <div class="weapon-slot locked" id="wep-3" onclick="switchWeapon(3)">
                     <div class="text-xs text-yellow-300">[4]</div>
@@ -219,8 +241,37 @@
                 </div>
             </div>
 
-            <div class="hud-text text-xs opacity-80 text-center">WASD to Move | Mouse to Aim & Shoot | 1-4 / Scroll to Switch Weapons | Shift to Dash</div>
+            <div class="hud-text text-xs opacity-80 text-center">WASD to Move | Mouse to Aim & Shoot | 1-4 / Scroll to Switch Weapons | Shift to Dash | P to Pause</div>
         </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div id="pauseModal" class="hidden">
+        <h2 class="text-4xl font-black mb-4 text-yellow-400 title-glow">GAME PAUSED</h2>
+        <div class="flex flex-col gap-3 justify-center items-center">
+            <button onclick="togglePause()">RESUME GAME</button>
+            <button onclick="openAdminPrompt()" class="admin-btn">🔑 ADMIN PANEL</button>
+            <button onclick="restartBtn.click()" style="background: linear-gradient(to bottom, #ef5350, #c62828); border-color: #ef9a9a;">RESTART GAME</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="hidden">
+        <h2 class="text-3xl font-black mb-2 text-yellow-400 title-glow">⚡ ADMIN CONTROL PANEL</h2>
+        <p class="text-xs text-green-200 mb-4">Secret Code Verified! Cheats Enabled.</p>
+        
+        <div class="grid grid-cols-2 gap-2 mb-4">
+            <button onclick="adminToggleGodMode()" id="godBtn" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-indigo-600 border-indigo-300">GOD MODE: OFF</button>
+            <button onclick="adminFullHeal()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-emerald-600 border-emerald-300">FULL HEAL (100 HP)</button>
+            <button onclick="adminUnlockWeapons()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-amber-600 border-amber-300">UNLOCK ALL WEAPONS</button>
+            <button onclick="adminAddScore()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-purple-600 border-purple-300">+1000 PICKLED SCORE</button>
+            <button onclick="adminKillEnemies()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-rose-700 border-rose-300">KILL ALL ENEMIES</button>
+            <button onclick="adminSkipWave()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-teal-600 border-teal-300">SKIP WAVE</button>
+            <button onclick="adminMegaDamage()" id="dmgBtn" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-yellow-600 border-yellow-300">MEGA DMG: OFF</button>
+            <button onclick="adminMaxSpeed()" class="!py-2 !px-3 !text-xs !mt-0 !rounded-lg bg-blue-600 border-blue-300">SUPER SPEED BOOST</button>
+        </div>
+
+        <button onclick="closeAdminPanel()" class="!py-2 !px-6 !text-sm !mt-2 bg-gray-600 border-gray-400">CLOSE PANEL</button>
     </div>
 
     <!-- Upgrade Modal -->
@@ -265,6 +316,14 @@
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                 osc.start(now);
                 osc.stop(now + 0.1);
+            } else if (type === 'flame') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120 + Math.random() * 80, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.08);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
             } else if (type === 'shotgun') {
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(250, now);
@@ -350,11 +409,13 @@
     let waveTotalEnemies = 0;
 
     let waveCheckpoint = null;
+    let isGodMode = false;
+    let isMegaDamage = false;
 
     const WEAPONS = [
         { id: 'brine', name: 'BRINE BLASTER', cooldown: 10, speed: 16, damage: 1.5, spread: 0.05, count: 1, type: 'normal', isPiercing: false, unlocked: true },
         { id: 'shotgun', name: 'DILL SHOTGUN', cooldown: 28, speed: 14, damage: 1.2, spread: 0.35, count: 5, type: 'spread', isPiercing: false, unlocked: false, unlockAfterLevel: 1 },
-        { id: 'mortar', name: 'RELISH MORTAR', cooldown: 40, speed: 10, damage: 4.0, spread: 0.1, count: 1, type: 'explosive', radius: 70, isPiercing: false, unlocked: false, unlockAfterLevel: 3 },
+        { id: 'flamethrower', name: 'RELISH FLAMETHROWER', cooldown: 2, speed: 9, damage: 0.45, spread: 0.45, count: 2, type: 'flame', isPiercing: true, unlocked: false, unlockAfterLevel: 3 },
         { id: 'beam', name: 'PIERCING BEAM', cooldown: 4, speed: 24, damage: 0.9, spread: 0.01, count: 1, type: 'laser', isPiercing: true, unlocked: false, unlockAfterLevel: 5 }
     ];
 
@@ -404,54 +465,95 @@
         if (e.key === '2') switchWeapon(1);
         if (e.key === '3') switchWeapon(2);
         if (e.key === '4') switchWeapon(3);
+        if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+            togglePause();
+        }
     });
 
     window.addEventListener('keyup', e => {
-        if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-        if (e.key === 'Shift') keys.Shift = false;
-    });
-
-    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-    window.addEventListener('mousedown', () => { initAudio(); mouse.down = true; });
-    window.addEventListener('mouseup', () => mouse.down = false);
-
-    window.addEventListener('wheel', e => {
-        if (gameState !== 'playing' || !player) return;
-        let dir = e.deltaY > 0 ? 1 : -1;
-        let nextIndex = player.activeWeaponIndex;
-        for (let i = 0; i < WEAPONS.length; i++) {
-            nextIndex = (nextIndex + dir + WEAPONS.length) % WEAPONS.length;
-            if (WEAPONS[nextIndex].unlocked) {
-                switchWeapon(nextIndex);
-                break;
-            }
+    function togglePause() {
+        if (gameState === 'playing') {
+            gameState = 'paused';
+            document.getElementById('pauseModal').classList.remove('hidden');
+            canvas.style.filter = "blur(3px)";
+        } else if (gameState === 'paused') {
+            gameState = 'playing';
+            document.getElementById('pauseModal').classList.add('hidden');
+            document.getElementById('adminModal').classList.add('hidden');
+            canvas.style.filter = "none";
+            gameLoop();
         }
-    });
-
-    window.addEventListener('touchstart', e => {
-        initAudio();
-        if (e.touches.length > 0) {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-            mouse.down = true;
-        }
-    });
-    window.addEventListener('touchmove', e => {
-        if (e.touches.length > 0) {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-        }
-    });
-    window.addEventListener('touchend', () => mouse.down = false);
-
-    function shakeScreen(magnitude, duration) {
-        screenShakeMagnitude = magnitude;
-        screenShakeTime = duration;
     }
 
-    function flashDamageOverlay() {
-        damageOverlay.style.opacity = '1';
-        setTimeout(() => { damageOverlay.style.opacity = '0'; }, 150);
+    function openAdminPrompt() {
+        const code = prompt("Enter Secret Admin Code:");
+        if (code === 'admincucumber') {
+            document.getElementById('pauseModal').classList.add('hidden');
+            document.getElementById('adminModal').classList.remove('hidden');
+        } else if (code !== null) {
+            floatingTexts.push(new FloatingText(width/2, height/2, "INVALID CODE!", "#ff5252"));
+        }
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminModal').classList.add('hidden');
+        if (gameState === 'paused') {
+            document.getElementById('pauseModal').classList.remove('hidden');
+        }
+    }
+
+    function adminToggleGodMode() {
+        isGodMode = !isGodMode;
+        document.getElementById('godBtn').innerText = `GOD MODE: ${isGodMode ? 'ON' : 'OFF'}`;
+        document.getElementById('godBtn').style.background = isGodMode ? '#10b981' : '#4f46e5';
+    }
+
+    function adminFullHeal() {
+        if (player) {
+            player.health = player.maxHealth;
+            floatingTexts.push(new FloatingText(player.x, player.y - 40, "FULL HEAL!", "#34d399"));
+        }
+    }
+
+    function adminUnlockWeapons() {
+        WEAPONS.forEach(w => w.unlocked = true);
+        updateWeaponSlotsUI();
+        floatingTexts.push(new FloatingText(width/2, height/2, "ALL WEAPONS UNLOCKED!", "#fbbf24"));
+    }
+
+    function adminAddScore() {
+        score += 1000;
+        scoreDisplay.innerText = `PICKLED: ${score}`;
+        floatingTexts.push(new FloatingText(width/2, height/2, "+1000 SCORE!", "#a78bfa"));
+    }
+
+    function adminKillEnemies() {
+        triggerNuke();
+    }
+
+    function adminSkipWave() {
+        enemiesDefeatedInWave = waveTotalEnemies;
+        enemiesToSpawn = 0;
+        enemies = [];
+        closeAdminPanel();
+        if (gameState === 'paused') togglePause();
+        checkWaveProgress();
+    }
+
+    function adminMegaDamage() {
+        isMegaDamage = !isMegaDamage;
+        if (player) {
+            player.damageMultiplier = isMegaDamage ? 10 : 1;
+        }
+        document.getElementById('dmgBtn').innerText = `MEGA DMG: ${isMegaDamage ? 'ON (10x)' : 'OFF'}`;
+        document.getElementById('dmgBtn').style.background = isMegaDamage ? '#10b981' : '#d97706';
+    }
+
+    function adminMaxSpeed() {
+        if (player) {
+            player.speedBoostTime = 3600;
+            floatingTexts.push(new FloatingText(player.x, player.y - 40, "MAX SPEED!", "#38bdf8"));
+        }
     }
 
     class Particle {
@@ -822,8 +924,8 @@
             const px = this.x + Math.cos(this.angle) * turretLength;
             const py = this.y + Math.sin(this.angle) * turretLength;
             
-            this.x -= Math.cos(this.angle) * 2;
-            this.y -= Math.sin(this.angle) * 2;
+            this.x -= Math.cos(this.angle) * 1.5;
+            this.y -= Math.sin(this.angle) * 1.5;
 
             const finalDmg = weapon.damage * this.damageMultiplier;
 
@@ -832,6 +934,20 @@
                 for (let i = 0; i < weapon.count; i++) {
                     const spreadAngle = this.angle + (i - (weapon.count - 1) / 2) * weapon.spread;
                     projectiles.push(new Projectile(px, py, spreadAngle, true, finalDmg, weapon.speed, 8, "#fff59d", "#fbc02d", false, 0, weapon.isPiercing));
+                }
+            } else if (weapon.type === 'flame') {
+                playSound('flame');
+                for (let i = 0; i < weapon.count; i++) {
+                    const spreadAngle = this.angle + (Math.random() - 0.5) * weapon.spread;
+                    const flameSpeed = weapon.speed * (0.8 + Math.random() * 0.4);
+                    const flameLife = Math.floor(16 + Math.random() * 10);
+                    const colors = [
+                        { inner: "#fff176", outer: "#f57c00" },
+                        { inner: "#ffb74d", outer: "#e65100" },
+                        { inner: "#ff8a65", outer: "#bf360c" }
+                    ];
+                    const c = colors[Math.floor(Math.random() * colors.length)];
+                    projectiles.push(new Projectile(px, py, spreadAngle, true, finalDmg, flameSpeed, 12, c.inner, c.outer, false, 0, true, flameLife));
                 }
             } else if (weapon.type === 'explosive') {
                 playSound('explosion');
@@ -844,8 +960,8 @@
                 projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 10, "#c8e6c9", "#1b5e20", false, 0, weapon.isPiercing));
             }
 
-            createParticles(px, py, "#c8e6c9", 4, 0.8, this.angle, 0.4);
-            shakeScreen(1, 2);
+            createParticles(px, py, "#c8e6c9", 3, 0.8, this.angle, 0.4);
+            shakeScreen(1, 1);
         }
 
         draw(ctx) {
@@ -872,14 +988,14 @@
     }
 
     class Projectile {
-        constructor(x, y, angle, isPlayer, damage = 1, speed = 15, size = 10, colorInner = "#c8e6c9", colorOuter = "#1b5e20", isExplosive = false, explosionRadius = 0, isPiercing = false) {
+        constructor(x, y, angle, isPlayer, damage = 1, speed = 15, size = 10, colorInner = "#c8e6c9", colorOuter = "#1b5e20", isExplosive = false, explosionRadius = 0, isPiercing = false, maxLife = 100) {
             this.x = x;
             this.y = y;
             this.vx = Math.cos(angle) * speed;
             this.vy = Math.sin(angle) * speed;
             this.radius = size;
             this.isPlayer = isPlayer;
-            this.life = 100;
+            this.life = maxLife;
             this.damage = damage;
             this.colorInner = colorInner;
             this.colorOuter = colorOuter;
@@ -1440,7 +1556,7 @@
             } else {
                 const dist = Math.hypot(p.x - player.x, p.y - player.y);
                 if (dist < p.radius + player.radius && !player.isDashing) {
-                    if (player.shieldTime <= 0) {
+                    if (player.shieldTime <= 0 && !isGodMode) {
                         player.health -= p.damage;
                         flashDamageOverlay();
                         shakeScreen(5, 5);
@@ -1459,7 +1575,7 @@
 
             const dist = Math.hypot(player.x - e.x, player.y - e.y);
             if (dist < player.radius + Math.max(e.width, e.height)/3 && !player.isDashing) {
-                if (player.shieldTime <= 0) {
+                if (player.shieldTime <= 0 && !isGodMode) {
                     let dmg = e.type === 'boss' ? 30 : 10;
                     player.health -= dmg;
                     flashDamageOverlay();
