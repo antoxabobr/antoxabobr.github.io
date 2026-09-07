@@ -194,13 +194,12 @@
                 <div class="w-64 h-7 bg-black border-4 border-green-900 rounded-full overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.8)]">
                     <div id="healthBar" class="h-full bg-gradient-to-r from-green-600 via-green-400 to-green-300 w-full transition-all duration-100 ease-out"></div>
                 </div>
-                <div id="activeBuffs" class="flex gap-2 mt-2 text-xs"></div>
+                <div id="activeBuffs" class="flex flex-wrap justify-end gap-2 mt-2 text-xs"></div>
             </div>
         </div>
 
-        <!-- Bottom UI container keeping the center screen clear -->
+        <!-- Bottom UI container keeping center screen clear -->
         <div class="flex flex-col items-center gap-2 w-full">
-            <!-- Weapon Selector Bar -->
             <div class="flex justify-center flex-wrap gap-2 sm:gap-3 w-full">
                 <div class="weapon-slot active" id="wep-0" onclick="switchWeapon(0)">
                     <div class="text-xs text-yellow-300">[1]</div>
@@ -224,16 +223,16 @@
         </div>
     </div>
 
-    <!-- Upgrade / Wave Complete Modal -->
+    <!-- Upgrade Modal -->
     <div id="upgradeModal" class="hidden">
         <h2 class="text-4xl font-black mb-2 text-yellow-400 title-glow">WAVE CLEARED!</h2>
-        <p class="text-green-200 mb-6">Choose a cucumber upgrade or unlock a new weapon:</p>
+        <p class="text-green-200 mb-6" id="upgradeSubtitle">Choose a cucumber upgrade or unlock a new weapon:</p>
         <div id="upgradeOptions" class="flex flex-wrap gap-4 justify-center"></div>
     </div>
 
     <div id="menu">
         <h1 class="text-6xl font-black mb-2 text-green-400 title-glow tracking-tighter">CUCUMBER<br>CARNAGE</h1>
-        <p class="text-green-200 mb-6 text-xl font-semibold" id="menuSubtitle">Start with your trusty Brine Blaster & unlock new weapons as you clear waves!</p>
+        <p class="text-green-200 mb-6 text-xl font-semibold" id="menuSubtitle">Battle through 5 Levels! Unlock Shotgun after Level 1, Mortar after Level 3, and Piercing Beam after Level 5!</p>
         <div id="finalScore" class="text-3xl font-black mb-6 hidden text-yellow-400" style="text-shadow: 0 0 10px rgba(255,215,0,0.5);"></div>
         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button id="startBtn">START HARVESTING</button>
@@ -242,7 +241,6 @@
     </div>
 
 <script>
-    // Web Audio API Synthesizer for procedural sound effects
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
 
@@ -307,7 +305,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // UI Elements
     const menu = document.getElementById('menu');
     const startBtn = document.getElementById('startBtn');
     const restartBtn = document.getElementById('restartBtn');
@@ -319,13 +316,13 @@
     const finalScoreDisplay = document.getElementById('finalScore');
     const damageOverlay = document.getElementById('damageOverlay');
     const upgradeModal = document.getElementById('upgradeModal');
+    const upgradeSubtitle = document.getElementById('upgradeSubtitle');
     const upgradeOptionsContainer = document.getElementById('upgradeOptions');
 
     let width, height;
     let gameLoopId;
-    let gameState = 'menu'; // menu, playing, wave_clear, gameover
+    let gameState = 'menu';
 
-    // Game State variables
     let player;
     let projectiles = [];
     let enemies = [];
@@ -337,7 +334,6 @@
     let screenShakeTime = 0;
     let screenShakeMagnitude = 0;
     
-    // Input state
     const keys = {
         w: false, a: false, s: false, d: false,
         ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false,
@@ -345,25 +341,23 @@
     };
     const mouse = { x: 0, y: 0, down: false };
 
-    // Level / Wave Progression Variables - Expanded for Endless Scaling
     let currentLevel = 1;
     let currentWave = 1;
-    let maxWavesPerLevel = 8;
+    let maxWavesPerLevel = 3;
+    let totalLevels = 5;
     let enemiesToSpawn = 0;
     let enemiesDefeatedInWave = 0;
     let waveTotalEnemies = 0;
 
-    // Checkpoint state for retrying waves
     let waveCheckpoint = null;
 
     const WEAPONS = [
         { id: 'brine', name: 'BRINE BLASTER', cooldown: 10, speed: 16, damage: 1.5, spread: 0.05, count: 1, type: 'normal', isPiercing: false, unlocked: true },
-        { id: 'shotgun', name: 'DILL SHOTGUN', cooldown: 28, speed: 14, damage: 1.2, spread: 0.35, count: 5, type: 'spread', isPiercing: false, unlocked: false },
-        { id: 'mortar', name: 'RELISH MORTAR', cooldown: 40, speed: 10, damage: 4.0, spread: 0.1, count: 1, type: 'explosive', radius: 70, isPiercing: false, unlocked: false },
-        { id: 'beam', name: 'PIERCING BEAM', cooldown: 4, speed: 24, damage: 0.8, spread: 0.01, count: 1, type: 'laser', isPiercing: true, unlocked: false }
+        { id: 'shotgun', name: 'DILL SHOTGUN', cooldown: 28, speed: 14, damage: 1.2, spread: 0.35, count: 5, type: 'spread', isPiercing: false, unlocked: false, unlockAfterLevel: 1 },
+        { id: 'mortar', name: 'RELISH MORTAR', cooldown: 40, speed: 10, damage: 4.0, spread: 0.1, count: 1, type: 'explosive', radius: 70, isPiercing: false, unlocked: false, unlockAfterLevel: 3 },
+        { id: 'beam', name: 'PIERCING BEAM', cooldown: 4, speed: 24, damage: 0.9, spread: 0.01, count: 1, type: 'laser', isPiercing: true, unlocked: false, unlockAfterLevel: 5 }
     ];
 
-    // Resize canvas
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
@@ -396,14 +390,13 @@
     function switchWeapon(index) {
         if (!player) return;
         if (!WEAPONS[index].unlocked) {
-            floatingTexts.push(new FloatingText(player.x, player.y - 30, "WEAPON LOCKED!", "#ff5252"));
+            floatingTexts.push(new FloatingText(player.x, player.y - 30, `UNLOCKS AFTER LEVEL ${WEAPONS[index].unlockAfterLevel}!`, "#ff5252"));
             return;
         }
         player.activeWeaponIndex = index;
         updateWeaponSlotsUI();
     }
 
-    // Input listeners
     window.addEventListener('keydown', e => { 
         if (keys.hasOwnProperty(e.key)) keys[e.key] = true; 
         if (e.key === 'Shift') keys.Shift = true;
@@ -435,7 +428,6 @@
         }
     });
 
-    // Touch support
     window.addEventListener('touchstart', e => {
         initAudio();
         if (e.touches.length > 0) {
@@ -451,8 +443,6 @@
         }
     });
     window.addEventListener('touchend', () => mouse.down = false);
-
-    // --- Helper Effects & Drawing Routines ---
 
     function shakeScreen(magnitude, duration) {
         screenShakeMagnitude = magnitude;
@@ -548,13 +538,11 @@
         ctx.translate(x, y);
         ctx.rotate(angle);
 
-        // Body Shadow
         ctx.fillStyle = "rgba(0,0,0,0.3)";
         ctx.beginPath();
         ctx.ellipse(0, 8, w/2, h/2, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Main Cucumber Shape
         ctx.fillStyle = colorBase;
         ctx.strokeStyle = colorDark;
         ctx.lineWidth = 3;
@@ -563,13 +551,11 @@
         ctx.fill();
         ctx.stroke();
 
-        // Texture / Bumps / Ribs
         ctx.fillStyle = colorLight;
         ctx.beginPath(); ctx.arc(-w/4, -h/5, Math.max(2, w/12), 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(0, h/4, Math.max(2, w/10), 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(w/4, -h/6, Math.max(2, w/12), 0, Math.PI*2); ctx.fill();
 
-        // Type specific details
         if (type === 'boss') {
             ctx.fillStyle = "#ffeb3b";
             ctx.beginPath(); ctx.arc(-w/6, -h/4, 5, 0, Math.PI*2); ctx.fill();
@@ -583,7 +569,6 @@
         ctx.save();
         ctx.translate(player.x, player.y);
 
-        // Ground shadow with neon cyan hero glow
         ctx.fillStyle = 'rgba(0, 229, 255, 0.25)';
         ctx.beginPath();
         ctx.ellipse(0, 0, player.width/1.1, player.height * 1.3, 0, 0, Math.PI * 2);
@@ -594,7 +579,6 @@
         ctx.ellipse(0, 16, player.width/1.4, player.height/1.5, 0, 0, Math.PI*2); 
         ctx.fill();
 
-        // Pulsing Hero Shield Ring Base
         const shieldPulse = Math.sin(frameCount * 0.1) * 3 + 6;
         ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
         ctx.lineWidth = 2;
@@ -602,27 +586,22 @@
         ctx.arc(0, 0, player.width/1.3 + shieldPulse, 0, Math.PI * 2);
         ctx.stroke();
 
-        // --- HEAVY INDUSTRIAL CYBER TREADS (Top & Bottom) ---
         const treadWidth = player.width * 1.25;
         const treadHeight = 14;
         const treadYOffset = player.height / 2 + 4;
 
-        // Dark Titanium Tread Frame with Gold Accents
         ctx.fillStyle = "#0f172a";
         ctx.strokeStyle = "#f59e0b";
         ctx.lineWidth = 2.5;
 
-        // Top Tread Frame
         ctx.beginPath();
         ctx.roundRect(-treadWidth/2, -treadYOffset - treadHeight, treadWidth, treadHeight, 6);
         ctx.fill(); ctx.stroke();
         
-        // Bottom Tread Frame
         ctx.beginPath();
         ctx.roundRect(-treadWidth/2, treadYOffset, treadWidth, treadHeight, 6);
         ctx.fill(); ctx.stroke();
 
-        // Animated Neon Cyan & Gold Tread Track Spockets
         ctx.fillStyle = "#00e5ff";
         ctx.shadowColor = "#00e5ff";
         ctx.shadowBlur = 8;
@@ -633,11 +612,9 @@
         }
         ctx.shadowBlur = 0;
 
-        // --- ROTATED HERO TANK HULL & TURRET ---
         ctx.save();
         ctx.rotate(player.angle);
 
-        // Cyber-Chassis Gold/Blue Alloy Frame
         ctx.fillStyle = "#0284c7";
         ctx.strokeStyle = "#fbbf24";
         ctx.lineWidth = 3;
@@ -645,7 +622,6 @@
         ctx.roundRect(-player.width/2 - 4, -player.height/2 - 3, player.width + 8, player.height + 6, 14);
         ctx.fill(); ctx.stroke();
 
-        // Metallic Hero Pickle Core (Cyber-Bright Emerald Rind)
         ctx.fillStyle = "#16a34a";
         ctx.strokeStyle = "#86efac";
         ctx.lineWidth = 3;
@@ -653,7 +629,6 @@
         ctx.ellipse(0, 0, player.width/2.1, player.height/2.1, 0, 0, Math.PI * 2);
         ctx.fill(); ctx.stroke();
 
-        // Reinforced Metallic Chest Armor & Hero Star Plate
         ctx.fillStyle = "#1e293b";
         ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2;
@@ -661,7 +636,6 @@
         ctx.roundRect(-player.width/2.4, -player.height/2.4, player.width/2.3, player.height/1.2, 8);
         ctx.fill(); ctx.stroke();
 
-        // Gold Hero Crest / Wing Trim
         ctx.fillStyle = "#f59e0b";
         ctx.beginPath();
         ctx.moveTo(-player.width/3, -player.height/2.2);
@@ -675,7 +649,6 @@
         ctx.lineTo(-player.width/4, player.height/3.5);
         ctx.closePath(); ctx.fill();
 
-        // Central Reactor Core (Pulsing Plasma Engine)
         const enginePulse = Math.sin(frameCount * 0.2) * 4 + 11;
         ctx.fillStyle = "#38bdf8";
         ctx.shadowColor = "#38bdf8";
@@ -690,7 +663,6 @@
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Cyber Helmet Visor (Glowing Neon Red Hero Eye Strip)
         ctx.fillStyle = "#ff0055";
         ctx.shadowColor = "#ff0055";
         ctx.shadowBlur = 10;
@@ -699,27 +671,21 @@
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // DUAL OVERSIZED RAILGUN CANNON BARRELS
         ctx.fillStyle = "#334155";
         ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2;
 
-        // Top Barrel
         ctx.fillRect(8, -10, player.width/1.4, 6);
         ctx.strokeRect(8, -10, player.width/1.4, 6);
-        // Energy Muzzle Ring
         ctx.fillStyle = "#00e5ff";
         ctx.fillRect(8 + player.width/1.4 - 4, -12, 6, 10);
 
-        // Bottom Barrel
         ctx.fillStyle = "#334155";
         ctx.fillRect(8, 4, player.width/1.4, 6);
         ctx.strokeRect(8, 4, player.width/1.4, 6);
-        // Energy Muzzle Ring
         ctx.fillStyle = "#00e5ff";
         ctx.fillRect(8 + player.width/1.4 - 4, 2, 6, 10);
 
-        // Laser Aiming Sight Line
         ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
         ctx.lineWidth = 1.5;
         ctx.setLineDash([6, 6]);
@@ -737,19 +703,16 @@
         ctx.save();
         ctx.translate(x, y);
 
-        // Rind
         ctx.fillStyle = colorOuter;
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Flesh
         ctx.fillStyle = colorInner;
         ctx.beginPath();
         ctx.arc(0, 0, radius * 0.75, 0, Math.PI * 2);
         ctx.fill();
 
-        // Seeds
         ctx.fillStyle = "#ffffff";
         ctx.beginPath(); ctx.arc(-radius*0.25, -radius*0.15, radius*0.12, 0, Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.arc(radius*0.25, -radius*0.15, radius*0.12, 0, Math.PI*2); ctx.fill();
@@ -757,8 +720,6 @@
 
         ctx.restore();
     }
-
-    // --- Entity Classes ---
 
     class Player {
         constructor(x, y) {
@@ -775,19 +736,17 @@
             this.height = 30;
             this.activeWeaponIndex = 0;
             
-            // Buffs
             this.shieldTime = 0;
             this.frenzyTime = 0;
+            this.speedBoostTime = 0;
             this.damageMultiplier = 1;
 
-            // Dash mechanics
             this.dashCooldown = 0;
             this.dashDuration = 0;
             this.isDashing = false;
         }
 
         update() {
-            // Movement logic
             let dx = 0; let dy = 0;
             if (keys.w || keys.ArrowUp) dy -= 1;
             if (keys.s || keys.ArrowDown) dy += 1;
@@ -800,18 +759,19 @@
                 dy /= length;
             }
 
-            // Buff timers
             if (this.shieldTime > 0) this.shieldTime--;
             if (this.frenzyTime > 0) this.frenzyTime--;
+            if (this.speedBoostTime > 0) this.speedBoostTime--;
 
-            // Dash logic
+            let currentBase = this.baseSpeed * (this.speedBoostTime > 0 ? 1.6 : 1.0);
+
             if (this.dashCooldown > 0) this.dashCooldown--;
             if (this.dashDuration > 0) {
                 this.dashDuration--;
-                this.speed = this.baseSpeed * 2.8;
+                this.speed = currentBase * 2.8;
                 createParticles(this.x, this.y, "#a5d6a7", 1, 0.5);
             } else {
-                this.speed = this.baseSpeed;
+                this.speed = currentBase;
                 this.isDashing = false;
                 if (keys.Shift && this.dashCooldown === 0 && (dx !== 0 || dy !== 0)) {
                     this.dashDuration = 10;
@@ -828,7 +788,6 @@
 
             this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
 
-            // Shooting
             const weapon = WEAPONS[this.activeWeaponIndex];
             const cooldownMax = this.frenzyTime > 0 ? Math.floor(weapon.cooldown / 2) : weapon.cooldown;
             
@@ -838,7 +797,6 @@
                 this.shootCooldown = cooldownMax;
             }
             
-            // Health UI Update
             const healthPct = this.health / this.maxHealth;
             healthBar.style.width = `${Math.max(0, healthPct * 100)}%`;
             
@@ -850,11 +808,11 @@
                 healthBar.className = "h-full bg-gradient-to-r from-red-600 via-red-500 to-red-400 w-full transition-all duration-100 ease-out";
             }
 
-            // Buff UI Display
             const buffEl = document.getElementById('activeBuffs');
             buffEl.innerHTML = '';
             if (this.shieldTime > 0) buffEl.innerHTML += `<span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold">SHIELD (${Math.ceil(this.shieldTime/60)}s)</span>`;
-            if (this.frenzyTime > 0) buffEl.innerHTML += `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-bold">FERMENTED FRENZY (${Math.ceil(this.frenzyTime/60)}s)</span>`;
+            if (this.frenzyTime > 0) buffEl.innerHTML += `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-bold">FRENZY (${Math.ceil(this.frenzyTime/60)}s)</span>`;
+            if (this.speedBoostTime > 0) buffEl.innerHTML += `<span class="bg-yellow-600 text-white px-2 py-0.5 rounded font-bold">SPEED (${Math.ceil(this.speedBoostTime/60)}s)</span>`;
 
             if (this.health <= 0) gameOver();
         }
@@ -873,17 +831,17 @@
                 playSound('shotgun');
                 for (let i = 0; i < weapon.count; i++) {
                     const spreadAngle = this.angle + (i - (weapon.count - 1) / 2) * weapon.spread;
-                    projectiles.push(new Projectile(px, py, spreadAngle, true, finalDmg, weapon.speed, 8, "#fff59d", "#fbc02d"));
+                    projectiles.push(new Projectile(px, py, spreadAngle, true, finalDmg, weapon.speed, 8, "#fff59d", "#fbc02d", false, 0, weapon.isPiercing));
                 }
             } else if (weapon.type === 'explosive') {
                 playSound('explosion');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 14, "#ff8a65", "#d84315", true, weapon.radius));
+                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 14, "#ff8a65", "#d84315", true, weapon.radius, weapon.isPiercing));
             } else if (weapon.type === 'laser') {
                 playSound('laser');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 6, "#80deea", "#00838f"));
+                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 8, "#80deea", "#00838f", false, 0, weapon.isPiercing));
             } else {
                 playSound('shoot');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 10, "#c8e6c9", "#1b5e20"));
+                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 10, "#c8e6c9", "#1b5e20", false, 0, weapon.isPiercing));
             }
 
             createParticles(px, py, "#c8e6c9", 4, 0.8, this.angle, 0.4);
@@ -891,7 +849,6 @@
         }
 
         draw(ctx) {
-            // Shield aura
             if (this.shieldTime > 0) {
                 ctx.save();
                 ctx.strokeStyle = '#29b6f6';
@@ -902,10 +859,8 @@
                 ctx.restore();
             }
 
-            // Draw Hero Cyber Cucumber Tank Sprite
             drawPlayerHeroCucumber(ctx, this);
             
-            // Dash indicator
             if (this.dashCooldown > 0) {
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                 ctx.lineWidth = 2;
@@ -948,35 +903,14 @@
             drawGlowingSlice(ctx, this.x, this.y, this.radius, this.colorInner, this.colorOuter);
         }
     }
-        shoot(weapon) {
-            const turretLength = this.width / 2 + 15;
-            const px = this.x + Math.cos(this.angle) * turretLength;
-            const py = this.y + Math.sin(this.angle) * turretLength;
-            
-            this.x -= Math.cos(this.angle) * 2;
-            this.y -= Math.sin(this.angle) * 2;
 
-            const finalDmg = weapon.damage * this.damageMultiplier;
-
-            if (weapon.type === 'spread') {
-                playSound('shotgun');
-                for (let i = 0; i < weapon.count; i++) {
-                    const spreadAngle = this.angle + (i - (weapon.count - 1) / 2) * weapon.spread;
-                    projectiles.push(new Projectile(px, py, spreadAngle, true, finalDmg, weapon.speed, 8, "#fff59d", "#fbc02d", false, 0, weapon.isPiercing));
-                }
-            } else if (weapon.type === 'explosive') {
-                playSound('explosion');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 14, "#ff8a65", "#d84315", true, weapon.radius, weapon.isPiercing));
-            } else if (weapon.type === 'laser') {
-                playSound('laser');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 8, "#80deea", "#00838f", false, 0, weapon.isPiercing));
-            } else {
-                playSound('shoot');
-                projectiles.push(new Projectile(px, py, this.angle, true, finalDmg, weapon.speed, 10, "#c8e6c9", "#1b5e20", false, 0, weapon.isPiercing));
-            }
-
-            createParticles(px, py, "#c8e6c9", 4, 0.8, this.angle, 0.4);
-            shakeScreen(1, 2);
+    class Powerup {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.radius = 16;
+            this.life = 600;
         }
 
         draw(ctx) {
@@ -986,6 +920,8 @@
             let label = '+';
             if (this.type === 'shield') { color = '#29b6f6'; label = 'S'; }
             if (this.type === 'frenzy') { color = '#ef5350'; label = 'F'; }
+            if (this.type === 'speed') { color = '#fbc02d'; label = 'V'; }
+            if (this.type === 'nuke') { color = '#ab47bc'; label = 'N'; }
 
             ctx.fillStyle = color;
             ctx.shadowColor = color;
@@ -1138,8 +1074,6 @@
         }
     }
 
-    // --- Progression & Game Loop ---
-
     function saveWaveCheckpoint() {
         waveCheckpoint = {
             playerHealth: player.health,
@@ -1183,13 +1117,11 @@
         
         enemiesDefeatedInWave = 0;
         
-        // Dynamic wave scaling for 8 waves
-        waveTotalEnemies = 8 + (currentLevel - 1) * 8 + currentWave * 4;
+        waveTotalEnemies = 6 + (currentLevel - 1) * 6 + currentWave * 4;
         enemiesToSpawn = waveTotalEnemies;
         
-        let waveBanner = `LEVEL ${currentLevel} • WAVE ${currentWave}/${maxWavesPerLevel}`;
-        if (currentWave === 4) waveBanner += " [MINI-BOSS]";
-        if (currentWave === maxWavesPerLevel) waveBanner += " [LEVEL BOSS]";
+        let waveBanner = `LEVEL ${currentLevel}/${totalLevels} • WAVE ${currentWave}/${maxWavesPerLevel}`;
+        if (currentWave === maxWavesPerLevel) waveBanner += " [BOSS]";
         
         waveDisplay.innerText = waveBanner;
         enemyCountDisplay.innerText = `ENEMIES LEFT: ${waveTotalEnemies}`;
@@ -1203,24 +1135,56 @@
         gameLoop();
     }
 
+    function triggerNuke() {
+        playSound('explosion');
+        shakeScreen(10, 15);
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            let e = enemies[i];
+            if (e.type !== 'boss') {
+                createExplosion(e.x, e.y, e.colorBase, e.colorLight);
+                score += e.scoreValue;
+                enemiesDefeatedInWave++;
+                enemies.splice(i, 1);
+            } else {
+                e.health -= 35;
+            }
+        }
+        scoreDisplay.innerText = `PICKLED: ${score}`;
+        checkWaveProgress();
+    }
+
     function checkWaveProgress() {
         const remaining = waveTotalEnemies - enemiesDefeatedInWave;
-        enemyCountDisplay.innerText = `ENEMIES LEFT: ${remaining}`;
+        enemyCountDisplay.innerText = `ENEMIES LEFT: ${Math.max(0, remaining)}`;
 
         if (remaining <= 0 && enemiesToSpawn <= 0 && enemies.length === 0) {
             playSound('pickup');
+            
+            const justCompletedLevel = currentLevel;
+            
             if (currentWave < maxWavesPerLevel) {
                 currentWave++;
-                showUpgradeModal(`WAVE ${currentWave - 1} CLEARED!`);
+                showUpgradeModal(`WAVE COMPLETED!`, false);
             } else {
-                currentLevel++;
-                currentWave = 1;
-                showUpgradeModal(`LEVEL ${currentLevel - 1} COMPLETED!`);
+                if (currentLevel < totalLevels) {
+                    currentLevel++;
+                    currentWave = 1;
+                    showUpgradeModal(`LEVEL ${justCompletedLevel} CLEARED!`, true, justCompletedLevel);
+                } else {
+                    // Won Game
+                    gameState = 'gameover';
+                    finalScoreDisplay.innerText = `VICTORY! ALL 5 LEVELS CLEARED!`;
+                    menuSubtitle.innerHTML = `You harvested all 5 Levels! Final Pickled Score: <span class="text-yellow-300 font-bold">${score}</span>`;
+                    finalScoreDisplay.classList.remove('hidden');
+                    startBtn.innerText = `PLAY AGAIN`;
+                    restartBtn.classList.add('hidden');
+                    menu.style.display = 'block';
+                }
             }
         }
     }
 
-    function showUpgradeModal(title) {
+    function showUpgradeModal(title, isLevelClear = false, completedLevelNum = 0) {
         gameState = 'wave_clear';
         const titleEl = upgradeModal.querySelector('h2');
         if (titleEl) titleEl.innerText = title;
@@ -1228,29 +1192,32 @@
         upgradeOptionsContainer.innerHTML = '';
         const options = [];
 
-        // Check locked weapons
-        const lockedWeapons = WEAPONS.filter(w => !w.unlocked);
-        if (lockedWeapons.length > 0) {
-            const nextWeapon = lockedWeapons[0];
-            options.push({
-                name: `UNLOCK: ${nextWeapon.name}`,
-                desc: `Arsenal Upgrade! Equip this powerful cucumber weapon.`,
-                isWeapon: true,
-                action: () => {
-                    nextWeapon.unlocked = true;
-                    switchWeapon(WEAPONS.indexOf(nextWeapon));
-                }
-            });
+        if (isLevelClear) {
+            const rewardWeapon = WEAPONS.find(w => w.unlockAfterLevel === completedLevelNum && !w.unlocked);
+            if (rewardWeapon) {
+                upgradeSubtitle.innerText = `LEVEL ${completedLevelNum} REWARD: NEW WEAPON UNLOCKED!`;
+                options.push({
+                    name: `EQUIP: ${rewardWeapon.name}`,
+                    desc: `Level ${completedLevelNum} Completion Reward!`,
+                    isWeapon: true,
+                    action: () => {
+                        rewardWeapon.unlocked = true;
+                        switchWeapon(WEAPONS.indexOf(rewardWeapon));
+                    }
+                });
+            } else {
+                upgradeSubtitle.innerText = "Choose an upgrade to prepare for the next level:";
+            }
+        } else {
+            upgradeSubtitle.innerText = "Choose a wave performance upgrade:";
         }
 
-        // Standard stats upgrades
         options.push(
             { name: "REPAIR JUICE", desc: "+40 Freshness Health", action: () => { player.health = Math.min(player.maxHealth, player.health + 40); } },
-            { name: "TACTICAL NITRO", desc: "+15% Movement Speed", action: () => { player.baseSpeed += 0.8; } },
-            { name: "FERMENTED POWDER", desc: "+25% All Damage", action: () => { player.damageMultiplier += 0.25; } }
+            { name: "TACTICAL NITRO", desc: "+15% Base Speed", action: () => { player.baseSpeed += 0.8; } },
+            { name: "FERMENTED POWDER", desc: "+25% All Weapon Damage", action: () => { player.damageMultiplier += 0.25; } }
         );
 
-        // Pick up to 3 options to present
         const selectedOptions = options.slice(0, 3);
 
         selectedOptions.forEach(u => {
@@ -1288,18 +1255,15 @@
         let type = 'normal';
         let r = Math.random();
         
-        // Special Boss Waves
         if (currentWave === maxWavesPerLevel && enemiesToSpawn === 1 && enemies.filter(e => e.type === 'boss').length === 0) {
             type = 'boss';
-        } else if (currentWave === 4 && enemiesToSpawn === 1 && enemies.filter(e => e.type === 'boss').length === 0) {
-            type = 'boss'; // Mid-level Mini Boss
         } else if (r < 0.25) {
             type = 'swarmer';
         } else if (r < 0.45) {
             type = 'fast';
-        } else if (r < 0.65 && currentWave >= 2) {
+        } else if (r < 0.65 && currentLevel >= 2) {
             type = 'sniper';
-        } else if (r < 0.85 && currentWave >= 3) {
+        } else if (r < 0.85 && currentLevel >= 3) {
             type = 'tank';
         }
 
@@ -1320,7 +1284,6 @@
         currentLevel = 1;
         currentWave = 1;
         
-        // Reset Weapons Unlock State (Start ONLY with Base Weapon)
         WEAPONS[0].unlocked = true;
         WEAPONS[1].unlocked = false;
         WEAPONS[2].unlocked = false;
@@ -1358,7 +1321,7 @@
         const startHp = waveCheckpoint ? waveCheckpoint.playerHealth : 100;
         
         finalScoreDisplay.innerText = `FAILED ON LEVEL ${currentLevel} • WAVE ${currentWave}`;
-        menuSubtitle.innerHTML = `Retrying will restart <span class="text-yellow-300 font-bold">Wave ${currentWave}</span> with your starting <span class="text-green-300 font-bold">${startHp} HP</span> and weapon arsenal.`;
+        menuSubtitle.innerHTML = `Retrying will restart <span class="text-yellow-300 font-bold">Level ${currentLevel} - Wave ${currentWave}</span> with your starting <span class="text-green-300 font-bold">${startHp} HP</span> and arsenal.`;
         finalScoreDisplay.classList.remove('hidden');
         
         startBtn.innerText = `RETRY WAVE ${currentWave}`;
@@ -1375,12 +1338,10 @@
 
         player.update();
 
-        // Spawn logic
         if (frameCount % 40 === 0 && enemiesToSpawn > 0) {
             spawnEnemy();
         }
 
-        // Powerups Update
         for (let i = powerups.length - 1; i >= 0; i--) {
             let p = powerups[i];
             p.life--;
@@ -1388,15 +1349,17 @@
 
             if (Math.hypot(player.x - p.x, player.y - p.y) < player.radius + p.radius) {
                 playSound('pickup');
-                if (p.type === 'health') player.health = Math.min(player.maxHealth, player.health + 25);
+                if (p.type === 'health') player.health = Math.min(player.maxHealth, player.health + 30);
                 if (p.type === 'shield') player.shieldTime = 480;
                 if (p.type === 'frenzy') player.frenzyTime = 360;
+                if (p.type === 'speed') player.speedBoostTime = 360;
+                if (p.type === 'nuke') triggerNuke();
+                
                 floatingTexts.push(new FloatingText(p.x, p.y, p.type.toUpperCase(), "#fff"));
                 powerups.splice(i, 1);
             }
         }
 
-        // Projectiles Update
         for (let i = projectiles.length - 1; i >= 0; i--) {
             let p = projectiles[i];
             p.update();
@@ -1427,8 +1390,8 @@
                                     scoreDisplay.innerText = `PICKLED: ${score}`;
                                     floatingTexts.push(new FloatingText(e.x, e.y, `+${e.scoreValue}`, "#a5d6a7"));
                                     
-                                    if (Math.random() < 0.2) {
-                                        const types = ['health', 'shield', 'frenzy'];
+                                    if (Math.random() < 0.25) {
+                                        const types = ['health', 'shield', 'frenzy', 'speed', 'nuke'];
                                         powerups.push(new Powerup(e.x, e.y, types[Math.floor(Math.random() * types.length)]));
                                     }
 
@@ -1461,8 +1424,8 @@
                                 scoreDisplay.innerText = `PICKLED: ${score}`;
                                 floatingTexts.push(new FloatingText(e.x, e.y, `+${e.scoreValue}`, "#a5d6a7"));
                                 
-                                if (Math.random() < 0.2) {
-                                    const types = ['health', 'shield', 'frenzy'];
+                                if (Math.random() < 0.25) {
+                                    const types = ['health', 'shield', 'frenzy', 'speed', 'nuke'];
                                     powerups.push(new Powerup(e.x, e.y, types[Math.floor(Math.random() * types.length)]));
                                 }
 
@@ -1490,7 +1453,6 @@
             if (hitSomething && !p.isPiercing) projectiles.splice(i, 1);
         }
 
-        // Enemies Collisions with Player
         for (let i = enemies.length - 1; i >= 0; i--) {
             let e = enemies[i];
             e.update();
@@ -1516,7 +1478,6 @@
             }
         }
 
-        // Particles & Floating Text
         for (let i = particles.length - 1; i >= 0; i--) {
             particles[i].update();
             if (particles[i].life <= 0) particles.splice(i, 1);
@@ -1577,7 +1538,6 @@
         resetGame();
     });
 
-    // Initial setup
     updateWeaponSlotsUI();
     draw();
 
