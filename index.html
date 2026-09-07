@@ -471,6 +471,10 @@
     });
 
     window.addEventListener('keyup', e => {
+        if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+        if (e.key === 'Shift') keys.Shift = false;
+    });
+
     function togglePause() {
         if (gameState === 'playing') {
             gameState = 'paused';
