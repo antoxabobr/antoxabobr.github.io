@@ -400,6 +400,59 @@
     };
     const mouse = { x: 0, y: 0, down: false };
 
+    window.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    window.addEventListener('mousedown', e => {
+        if (e.button === 0) {
+            mouse.down = true;
+            initAudio();
+        }
+    });
+
+    window.addEventListener('mouseup', e => {
+        if (e.button === 0) {
+            mouse.down = false;
+        }
+    });
+
+    window.addEventListener('touchstart', e => {
+        if (e.touches.length > 0) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+            mouse.down = true;
+            initAudio();
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', e => {
+        if (e.touches.length === 0) {
+            mouse.down = false;
+        }
+    });
+
+    function shakeScreen(magnitude, duration) {
+        screenShakeMagnitude = magnitude;
+        screenShakeTime = duration;
+    }
+
+    function flashDamageOverlay() {
+        if (!damageOverlay) return;
+        damageOverlay.style.opacity = '0.8';
+        setTimeout(() => {
+            if (damageOverlay) damageOverlay.style.opacity = '0';
+        }, 120);
+    }
+
     let currentLevel = 1;
     let currentWave = 1;
     let maxWavesPerLevel = 3;
