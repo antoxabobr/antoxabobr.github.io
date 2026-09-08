@@ -137,27 +137,6 @@
             overflow-y: auto;
         }
 
-        #leaderboardModal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(20, 50, 25, 0.98), rgba(8, 24, 10, 0.98));
-            padding: 25px;
-            border-radius: 20px;
-            border: 3px solid #fbc02d;
-            text-align: center;
-            pointer-events: auto;
-            color: white;
-            box-shadow: 0 0 35px rgba(251, 192, 45, 0.4);
-            z-index: 35;
-            width: 360px;
-            max-width: 90vw;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-
         .title-glow {
             text-shadow: 0 0 10px #81c784, 0 0 20px #4caf50, 0 0 30px #388e3c;
         }
@@ -275,22 +254,9 @@
         <h2 class="text-4xl font-black mb-4 text-yellow-400 title-glow">GAME PAUSED</h2>
         <div class="flex flex-col gap-3 justify-center items-center">
             <button onclick="togglePause()">RESUME GAME</button>
-            <button onclick="openLeaderboardModal()" class="!py-2 !px-5 !text-sm border-amber-300 bg-amber-700 hover:bg-amber-600">🏆 LEADERBOARD</button>
             <button onclick="openAdminPrompt()" class="admin-btn">🔑 ADMIN PANEL</button>
             <button onclick="restartBtn.click()" style="background: linear-gradient(to bottom, #ef5350, #c62828); border-color: #ef9a9a;">RESTART GAME</button>
         </div>
-    </div>
-
-    <!-- Leaderboard Modal -->
-    <div id="leaderboardModal" class="hidden">
-        <h2 class="text-3xl font-black mb-1 text-yellow-400 title-glow">🏆 PICKLEBOARD</h2>
-        <p class="text-xs text-green-200 mb-3">Top Picklers of All Time</p>
-        
-        <div id="leaderboardList" class="flex-1 overflow-y-auto my-2 pr-1 space-y-1.5 text-left text-sm max-h-60 bg-black/40 p-2 rounded-lg border border-green-800">
-            <div class="text-center text-xs text-green-400 py-4">Loading scores...</div>
-        </div>
-
-        <button onclick="closeLeaderboardModal()" class="!py-2 !px-6 !text-sm !mt-3 bg-gray-600 border-gray-400">CLOSE</button>
     </div>
 
     <!-- Admin Panel Modal -->
@@ -322,16 +288,10 @@
     <div id="menu">
         <h1 class="text-6xl font-black mb-2 text-green-400 title-glow tracking-tighter">CUCUMBER<br>CARNAGE</h1>
         <p class="text-green-200 mb-4 text-lg font-semibold" id="menuSubtitle">Battle through 10 Levels! Unlock Dill Shotgun (Lvl 2), Relish Flamethrower (Lvl 4), Piercing Beam (Lvl 6), and Pickle Mortar (Lvl 8)!</p>
-        
-        <div class="mb-4 flex flex-col items-center">
-            <label for="nicknameInput" class="text-xs font-bold text-yellow-300 uppercase tracking-widest mb-1">Pickler Nickname</label>
-            <input type="text" id="nicknameInput" maxlength="15" placeholder="Enter Nickname..." class="px-4 py-2 bg-black/60 border-2 border-green-500 rounded-xl text-center text-white font-bold text-lg focus:outline-none focus:border-yellow-400 w-64 shadow-inner">
-        </div>
 
         <div id="finalScore" class="text-3xl font-black mb-4 hidden text-yellow-400" style="text-shadow: 0 0 10px rgba(255,215,0,0.5);"></div>
         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button id="startBtn">START HARVESTING</button>
-            <button id="leaderboardBtn" onclick="openLeaderboardModal()" class="!py-3 !px-6 !text-lg !bg-amber-600 hover:!bg-amber-500 border-amber-300">🏆 SCORES</button>
             <button id="restartBtn" class="hidden" style="background: linear-gradient(to bottom, #ef5350, #c62828); border-color: #ef9a9a;">START FROM LEVEL 1</button>
         </div>
     </div>
@@ -1442,11 +1402,9 @@
                 } else {
                     // Won Game
                     gameState = 'gameover';
-                    const finalScoreValue = usedAdminCode ? -1 : score;
-                    submitLeaderboardScore(getPlayerName(), finalScoreValue);
 
                     finalScoreDisplay.innerText = `VICTORY! ALL 10 LEVELS CLEARED!`;
-                    menuSubtitle.innerHTML = `You harvested all 10 Levels! Final Picklescore: <span class="text-yellow-300 font-bold">${score}</span> ${usedAdminCode ? '<br><span class="text-red-400 text-xs">(Admin used: Leaderboard Score set to -1)</span>' : ''}`;
+                    menuSubtitle.innerHTML = `You harvested all 10 Levels! Final Picklescore: <span class="text-yellow-300 font-bold">${score}</span>`;
                     finalScoreDisplay.classList.remove('hidden');
                     startBtn.innerText = `PLAY AGAIN`;
                     restartBtn.classList.add('hidden');
@@ -1563,13 +1521,10 @@
         gameState = 'gameover';
         playSound('explosion');
         
-        const finalScoreValue = usedAdminCode ? -1 : score;
-        submitLeaderboardScore(getPlayerName(), finalScoreValue);
-
         const startHp = waveCheckpoint ? waveCheckpoint.playerHealth : 100;
         
         finalScoreDisplay.innerText = `FAILED ON LEVEL ${currentLevel} • WAVE ${currentWave}`;
-        menuSubtitle.innerHTML = `Retrying will restart <span class="text-yellow-300 font-bold">Level ${currentLevel} - Wave ${currentWave}</span> with your starting <span class="text-green-300 font-bold">${startHp} HP</span>. ${usedAdminCode ? '<br><span class="text-red-400 text-xs">(Admin used: Leaderboard Score set to -1)</span>' : ''}`;
+        menuSubtitle.innerHTML = `Retrying will restart <span class="text-yellow-300 font-bold">Level ${currentLevel} - Wave ${currentWave}</span> with your starting <span class="text-green-300 font-bold">${startHp} HP</span>.`;
         finalScoreDisplay.classList.remove('hidden');
         
         startBtn.innerText = `RETRY WAVE ${currentWave}`;
@@ -1789,137 +1744,6 @@
     updateWeaponSlotsUI();
     draw();
 
-</script>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'cucumber-carnage-game';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-        apiKey: "demo-api-key",
-        authDomain: "demo.firebaseapp.com",
-        projectId: "demo-project",
-        storageBucket: "demo.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:demo"
-    };
-
-    let auth, db, currentUser = null;
-
-    async function initFirebase() {
-        try {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
-                currentUser = userCredential.user;
-            } else {
-                const userCredential = await signInAnonymously(auth);
-                currentUser = userCredential.user;
-            }
-
-            listenToLeaderboard();
-        } catch (err) {
-            console.warn("Firebase initialized in local mode or fallback:", err);
-        }
-    }
-
-    function listenToLeaderboard() {
-        if (!db) return;
-        const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-        onSnapshot(lbRef, (snapshot) => {
-            const scores = [];
-            snapshot.forEach(docSnap => {
-                scores.push(docSnap.data());
-            });
-            renderLeaderboard(scores);
-        }, (err) => {
-            console.warn("Leaderboard snapshot error:", err);
-        });
-    }
-
-    window.submitLeaderboardScore = async function(nickname, pickleScore) {
-        if (!db || !currentUser) return;
-        try {
-            const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', currentUser.uid);
-            await setDoc(userDocRef, {
-                name: nickname,
-                score: pickleScore,
-                updatedAt: Date.now()
-            }, { merge: true });
-        } catch (err) {
-            console.warn("Could not submit score:", err);
-        }
-    };
-
-    window.getPlayerName = function() {
-        const input = document.getElementById('nicknameInput');
-        if (input && input.value.trim().length > 0) {
-            const cleaned = input.value.trim().substring(0, 15);
-            localStorage.setItem('cucumber_pickler_name', cleaned);
-            return cleaned;
-        }
-        return 'Dill Warrior';
-    };
-
-    function renderLeaderboard(scores) {
-        const container = document.getElementById('leaderboardList');
-        if (!container) return;
-
-        if (!scores || scores.length === 0) {
-            container.innerHTML = `<div class="text-center text-xs text-green-400 py-4">No scores logged yet! Be the first!</div>`;
-            return;
-        }
-
-        // Sort descending by score. Note: -1 scores stay at bottom
-        scores.sort((a, b) => b.score - a.score);
-
-        let html = '';
-        scores.forEach((entry, idx) => {
-            const isTop3 = idx < 3;
-            const badge = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
-            const isCheat = entry.score === -1;
-            const scoreDisplay = isCheat ? '<span class="text-red-400 font-bold">-1 (ADMIN)</span>' : `<span class="text-yellow-300 font-extrabold">${entry.score}</span>`;
-
-            html += `
-                <div class="flex justify-between items-center p-2 rounded ${isTop3 ? 'bg-amber-950/60 border border-amber-600/40' : 'bg-green-950/40'} text-xs">
-                    <div class="flex items-center gap-2 overflow-hidden mr-2">
-                        <span class="font-black text-amber-400 w-6">${badge}</span>
-                        <span class="font-bold text-white truncate max-w-[140px]">${escapeHtml(entry.name || 'Anonymous')}</span>
-                    </div>
-                    <div>${scoreDisplay}</div>
-                </div>
-            `;
-        });
-
-        container.innerHTML = html;
-    }
-
-    function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-    }
-
-    window.openLeaderboardModal = function() {
-        document.getElementById('leaderboardModal').classList.remove('hidden');
-    };
-
-    window.closeLeaderboardModal = function() {
-        document.getElementById('leaderboardModal').classList.add('hidden');
-    };
-
-    // Load saved nickname if available
-    window.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('cucumber_pickler_name');
-        if (saved) {
-            const input = document.getElementById('nicknameInput');
-            if (input) input.value = saved;
-        }
-        initFirebase();
-    });
 </script>
 </body>
 </html>
