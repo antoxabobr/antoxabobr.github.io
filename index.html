@@ -239,9 +239,13 @@
                     <div class="text-xs text-yellow-300">[4]</div>
                     <div class="text-xs sm:text-sm font-black" id="wep-name-3">🔒 PIERCING BEAM</div>
                 </div>
+                <div class="weapon-slot locked" id="wep-4" onclick="switchWeapon(4)">
+                    <div class="text-xs text-yellow-300">[5]</div>
+                    <div class="text-xs sm:text-sm font-black" id="wep-name-4">🔒 PICKLE MORTAR</div>
+                </div>
             </div>
 
-            <div class="hud-text text-xs opacity-80 text-center">WASD to Move | Mouse to Aim & Shoot | 1-4 / Scroll to Switch Weapons | Shift to Dash | P to Pause</div>
+            <div class="hud-text text-xs opacity-80 text-center">WASD to Move | Mouse to Aim & Shoot | 1-5 / Scroll to Switch Weapons | Shift to Dash | P to Pause</div>
         </div>
     </div>
 
@@ -283,7 +287,7 @@
 
     <div id="menu">
         <h1 class="text-6xl font-black mb-2 text-green-400 title-glow tracking-tighter">CUCUMBER<br>CARNAGE</h1>
-        <p class="text-green-200 mb-6 text-xl font-semibold" id="menuSubtitle">Battle through 5 Levels! Unlock Shotgun after Level 1, Mortar after Level 3, and Piercing Beam after Level 5!</p>
+        <p class="text-green-200 mb-6 text-xl font-semibold" id="menuSubtitle">Battle through 5 Levels! Unlock Shotgun after Level 1, Flamethrower after Level 2, Beam after Level 3, and Mortar after Level 4!</p>
         <div id="finalScore" class="text-3xl font-black mb-6 hidden text-yellow-400" style="text-shadow: 0 0 10px rgba(255,215,0,0.5);"></div>
         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <button id="startBtn">START HARVESTING</button>
@@ -468,8 +472,9 @@
     const WEAPONS = [
         { id: 'brine', name: 'BRINE BLASTER', cooldown: 10, speed: 16, damage: 1.5, spread: 0.05, count: 1, type: 'normal', isPiercing: false, unlocked: true },
         { id: 'shotgun', name: 'DILL SHOTGUN', cooldown: 28, speed: 14, damage: 1.2, spread: 0.35, count: 5, type: 'spread', isPiercing: false, unlocked: false, unlockAfterLevel: 1 },
-        { id: 'flamethrower', name: 'RELISH FLAMETHROWER', cooldown: 2, speed: 9, damage: 0.45, spread: 0.45, count: 2, type: 'flame', isPiercing: true, unlocked: false, unlockAfterLevel: 3 },
-        { id: 'beam', name: 'PIERCING BEAM', cooldown: 4, speed: 24, damage: 0.9, spread: 0.01, count: 1, type: 'laser', isPiercing: true, unlocked: false, unlockAfterLevel: 5 }
+        { id: 'flamethrower', name: 'RELISH FLAMETHROWER', cooldown: 2, speed: 9, damage: 0.45, spread: 0.45, count: 2, type: 'flame', isPiercing: true, unlocked: false, unlockAfterLevel: 2 },
+        { id: 'beam', name: 'PIERCING BEAM', cooldown: 4, speed: 24, damage: 0.9, spread: 0.01, count: 1, type: 'laser', isPiercing: true, unlocked: false, unlockAfterLevel: 3 },
+        { id: 'mortar', name: 'PICKLE MORTAR', cooldown: 38, speed: 12, damage: 5.0, spread: 0.05, count: 1, type: 'explosive', radius: 100, isPiercing: false, unlocked: false, unlockAfterLevel: 4 }
     ];
 
     function resize() {
@@ -518,6 +523,7 @@
         if (e.key === '2') switchWeapon(1);
         if (e.key === '3') switchWeapon(2);
         if (e.key === '4') switchWeapon(3);
+        if (e.key === '5') switchWeapon(4);
         if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
             togglePause();
         }
@@ -1342,7 +1348,15 @@
                 if (currentLevel < totalLevels) {
                     currentLevel++;
                     currentWave = 1;
-                    showUpgradeModal(`LEVEL ${justCompletedLevel} CLEARED!`, true, justCompletedLevel);
+                    
+                    // Auto unlock new weapon for clearing this level
+                    const unlockedWep = WEAPONS.find(w => w.unlockAfterLevel === justCompletedLevel);
+                    if (unlockedWep) {
+                        unlockedWep.unlocked = true;
+                        switchWeapon(WEAPONS.indexOf(unlockedWep));
+                    }
+
+                    showUpgradeModal(`LEVEL ${justCompletedLevel} CLEARED!`, true, justCompletedLevel, unlockedWep);
                 } else {
                     // Won Game
                     gameState = 'gameover';
@@ -1357,7 +1371,7 @@
         }
     }
 
-    function showUpgradeModal(title, isLevelClear = false, completedLevelNum = 0) {
+    function showUpgradeModal(title, isLevelClear = false, completedLevelNum = 0, newWeaponUnlocked = null) {
         gameState = 'wave_clear';
         const titleEl = upgradeModal.querySelector('h2');
         if (titleEl) titleEl.innerText = title;
@@ -1366,18 +1380,8 @@
         const options = [];
 
         if (isLevelClear) {
-            const rewardWeapon = WEAPONS.find(w => w.unlockAfterLevel === completedLevelNum && !w.unlocked);
-            if (rewardWeapon) {
-                upgradeSubtitle.innerText = `LEVEL ${completedLevelNum} REWARD: NEW WEAPON UNLOCKED!`;
-                options.push({
-                    name: `EQUIP: ${rewardWeapon.name}`,
-                    desc: `Level ${completedLevelNum} Completion Reward!`,
-                    isWeapon: true,
-                    action: () => {
-                        rewardWeapon.unlocked = true;
-                        switchWeapon(WEAPONS.indexOf(rewardWeapon));
-                    }
-                });
+            if (newWeaponUnlocked) {
+                upgradeSubtitle.innerHTML = `<span class="text-yellow-300 font-black text-xl block mb-1">🎉 NEW WEAPON UNLOCKED: ${newWeaponUnlocked.name}! 🎉</span>Choose an upgrade for Level ${currentLevel}:`;
             } else {
                 upgradeSubtitle.innerText = "Choose an upgrade to prepare for the next level:";
             }
@@ -1391,9 +1395,7 @@
             { name: "FERMENTED POWDER", desc: "+25% All Weapon Damage", action: () => { player.damageMultiplier += 0.25; } }
         );
 
-        const selectedOptions = options.slice(0, 3);
-
-        selectedOptions.forEach(u => {
+        options.forEach(u => {
             const card = document.createElement('div');
             card.className = 'upgrade-card';
             card.innerHTML = `
@@ -1401,7 +1403,7 @@
                     <div class="font-bold text-yellow-300 text-lg mb-2">${u.name}</div>
                     <div class="text-xs text-green-100">${u.desc}</div>
                 </div>
-                <div class="mt-4 text-xs text-yellow-400 font-bold uppercase tracking-wider">${u.isWeapon ? '★ NEW WEAPON' : 'UPGRADE'}</div>
+                <div class="mt-4 text-xs text-yellow-400 font-bold uppercase tracking-wider">UPGRADE</div>
             `;
             card.onclick = () => {
                 u.action();
@@ -1457,10 +1459,9 @@
         currentLevel = 1;
         currentWave = 1;
         
-        WEAPONS[0].unlocked = true;
-        WEAPONS[1].unlocked = false;
-        WEAPONS[2].unlocked = false;
-        WEAPONS[3].unlocked = false;
+        WEAPONS.forEach((w, index) => {
+            w.unlocked = (index === 0);
+        });
 
         scoreDisplay.innerText = `PICKLED: ${score}`;
         switchWeapon(0);
