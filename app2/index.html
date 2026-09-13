@@ -29,44 +29,55 @@
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            max-width: 100%;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #board-wrapper {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+            margin-bottom: 1.5rem;
         }
 
         #board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            width: 400px; /* Fixed width for better piece scaling */
-            height: 400px;
+            width: 100%;
+            height: 100%;
             border: 4px solid #4a5568; /* Tailwind gray-600 */
             border-radius: 0.5rem;
             overflow: hidden; /* Keep rounded corners clean */
-            margin-bottom: 1.5rem;
-        }
-
-        /* Responsive board size */
-        @media (max-width: 500px) {
-            #board {
-                width: 90vw;
-                height: 90vw;
-                max-width: 400px;
-                max-height: 400px;
-            }
+            box-sizing: border-box;
         }
 
         .square {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5rem;
+            width: 100%;
+            height: 100%;
             cursor: pointer;
             user-select: none; /* Prevent text selection on double click */
             transition: background-color 0.2s ease;
+            position: relative;
         }
 
+        .piece {
+            transition: transform 0.1s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Add subtle shadow to pieces */
+            width: 80%;
+            height: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 200%; /* Base font size relative to container */
+        }
+        
         /* Responsive piece size */
         @media (max-width: 500px) {
-            .square {
+            .piece {
                 font-size: 8vw;
             }
         }
@@ -167,17 +178,19 @@
         <div class="flex flex-col md:flex-row gap-8 w-full justify-center">
             
             <!-- Left Column: The Board -->
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center w-full">
                 <!-- Top Player Info (Black) -->
-                <div class="w-full flex justify-between items-center mb-2 px-2 text-gray-400 font-medium">
+                <div class="w-full flex justify-between items-center mb-2 px-2 text-gray-400 font-medium max-w-[400px]">
                     <span><i class="fa-solid fa-user-astronaut mr-2"></i>Black</span>
                     <span id="black-captured" class="text-sm tracking-widest text-white"></span>
                 </div>
                 
-                <div id="board"></div>
+                <div id="board-wrapper">
+                    <div id="board"></div>
+                </div>
                 
                 <!-- Bottom Player Info (White) -->
-                <div class="w-full flex justify-between items-center mt-2 px-2 text-gray-400 font-medium">
+                <div class="w-full flex justify-between items-center mt-2 px-2 text-gray-400 font-medium max-w-[400px]">
                     <span><i class="fa-solid fa-user mr-2"></i>White</span>
                     <span id="white-captured" class="text-sm tracking-widest text-black"></span>
                 </div>
@@ -270,6 +283,12 @@
         let capturedPieces = { w: [], b: [] }; // Pieces captured BY that color
         let isGameOver = false;
         
+        // Tracking if pieces have moved for castling and double pawn move
+        let pieceHasMoved = [];
+        for (let i = 0; i < 8; i++) {
+            pieceHasMoved.push(new Array(8).fill(false));
+        }
+        
         // Castling rights { wK: bool, wQ: bool, bK: bool, bQ: bool }
         let castlingRights = { wK: true, wQ: true, bK: true, bQ: true };
         
@@ -314,6 +333,12 @@
             moveHistory = [];
             capturedPieces = { w: [], b: [] };
             isGameOver = false;
+            
+            pieceHasMoved = [];
+            for (let i = 0; i < 8; i++) {
+                pieceHasMoved.push(new Array(8).fill(false));
+            }
+
             castlingRights = { wK: true, wQ: true, bK: true, bQ: true };
             enPassantTarget = null;
             pendingPromotionMove = null;
@@ -467,7 +492,6 @@
             switch (type) {
                 case PIECE_TYPES.PAWN:
                     const dir = color === COLORS.WHITE ? -1 : 1;
-                    const startRow = color === COLORS.WHITE ? 6 : 1;
                     
                     // Move forward 1
                     if (row + dir >= 0 && row + dir < 8 && board[row + dir][col] === null) {
@@ -475,7 +499,7 @@
                         moves.push({row: row + dir, col: col, isPromotion: isPromo});
                         
                         // Move forward 2 (only if hasn't moved and path clear)
-                        if (row === startRow && board[row + dir * 2][col] === null) {
+                        if (!pieceHasMoved[row][col] && board[row + dir * 2][col] === null) {
                             moves.push({row: row + dir * 2, col: col});
                         }
                     }
@@ -648,6 +672,10 @@
             // Move the piece (temporary for promotion, final for others)
             boardState[to.row][to.col] = piece;
             boardState[from.row][from.col] = null;
+            
+            // Track movement state
+            pieceHasMoved[to.row][to.col] = true;
+            pieceHasMoved[from.row][from.col] = false; // Source square is now empty
 
             // Handle Castling logic (move the rook)
             if (moveDetails.isCastle) {
@@ -656,10 +684,14 @@
                     // Kingside: Rook h->f
                     boardState[row][5] = boardState[row][7];
                     boardState[row][7] = null;
+                    pieceHasMoved[row][5] = true;
+                    pieceHasMoved[row][7] = false;
                 } else {
                     // Queenside: Rook a->d
                     boardState[row][3] = boardState[row][0];
                     boardState[row][0] = null;
+                    pieceHasMoved[row][3] = true;
+                    pieceHasMoved[row][0] = false;
                 }
             }
 
