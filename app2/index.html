@@ -337,6 +337,12 @@
     </div>
 </div>
 
+<!-- Toast Notification -->
+<div id="toast-notification" class="fixed bottom-5 right-5 bg-slate-800 text-white px-5 py-3 rounded-xl border border-slate-600 shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 pointer-events-none">
+    <i id="toast-icon" class="fa-solid fa-circle-info text-blue-400 text-lg"></i>
+    <span id="toast-message" class="text-sm font-medium"></span>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -357,26 +363,35 @@
     const db = getFirestore(app);
 
     let authUser = null;
+    let authPromise = null;
 
-    async function initAuth() {
-        try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                const cred = await signInWithCustomToken(auth, __initial_auth_token);
-                authUser = cred.user;
-            } else {
-                const cred = await signInAnonymously(auth);
-                authUser = cred.user;
-            }
-        } catch (e) {
-            console.error("Firebase auth error:", e);
+    async function ensureAuth() {
+        if (auth.currentUser) return auth.currentUser;
+        if (!authPromise) {
+            authPromise = (async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                        authUser = cred.user;
+                    } else {
+                        const cred = await signInAnonymously(auth);
+                        authUser = cred.user;
+                    }
+                } catch (e) {
+                    console.error("Firebase auth error:", e);
+                }
+                return authUser;
+            })();
         }
+        return await authPromise;
     }
 
-    initAuth();
+    ensureAuth();
 
     // Export variables to window for standard chess script accessibility
     window.db = db;
     window.appId = appId;
+    window.ensureAuth = ensureAuth;
     window.getAuthUser = () => authUser;
     window.doc = doc;
     window.setDoc = setDoc;
@@ -1101,9 +1116,33 @@
         event.target.classList.add('bg-emerald-600', 'border-emerald-500');
     }
 
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById('toast-notification');
+        const msgEl = document.getElementById('toast-message');
+        const iconEl = document.getElementById('toast-icon');
+        if (!toast || !msgEl) return;
+
+        msgEl.innerText = msg;
+        if (type === 'error') {
+            iconEl.className = 'fa-solid fa-triangle-exclamation text-red-400 text-lg';
+        } else if (type === 'success') {
+            iconEl.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+        } else {
+            iconEl.className = 'fa-solid fa-circle-info text-blue-400 text-lg';
+        }
+
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3500);
+    }
+
     async function createOnlineRoom() {
-        if (!window.db) {
-            alert("Connection error. Please try again.");
+        if (!window.db || !window.setDoc) {
+            showToast("Connecting to server... Please try again in a moment.", "info");
             return;
         }
 
@@ -1113,11 +1152,14 @@
         isOnlineMode = true;
         initialTimeSetting = selectedOnlineTime;
 
-        resetBoardState();
+        // Ensure user is authenticated before writing to database
+        const user = await window.ensureAuth();
+        if (!user) {
+            showToast("Authentication failed. Please check your connection.", "error");
+            return;
+        }
 
-        document.getElementById('waiting-code-display').innerText = roomCode;
-        hideModal('friend-modal');
-        showModal('waiting-modal');
+        resetBoardState();
 
         const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', roomCode);
 
@@ -1132,10 +1174,137 @@
 
         try {
             await window.setDoc(roomRef, initialDocData);
+            document.getElementById('waiting-code-display').innerText = roomCode;
+            hideModal('friend-modal');
+            showModal('waiting-modal');
             listenToOnlineRoom(roomCode);
         } catch (e) {
             console.error("Error creating room:", e);
-            alert("Failed to create room.");
+            showToast("Failed to create room. Please try again.", "error");
+        }
+    }
+
+    async function joinOnlineRoom() {
+        const codeInput = document.getElementById('join-code-input').value.trim();
+        if (!codeInput || codeInput.length !== 6) {
+            showToast("Please enter a valid 6-digit room code.", "error");
+            return;
+        }
+
+        if (!window.db || !window.getDoc) {
+            showToast("Connecting to server...", "info");
+            return;
+        }
+
+        const user = await window.ensureAuth();
+        if (!user) {
+            showToast("Authentication failed. Please try again.", "error");
+            return;
+        }
+
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', codeInput);
+
+        try {
+            const snap = await window.getDoc(roomRef);
+            if (!snap.exists()) {
+                showToast("Room not found! Please check the code.", "error");
+                return;
+            }
+
+            const data = snap.data();
+            if (data.status === 'active') {
+                showToast("This room is already full.", "error");
+                return;
+            }
+
+            currentRoomCode = codeInput;
+            playerColor = COLORS.BLACK;
+            isOnlineMode = true;
+
+            await window.updateDoc(roomRef, { status: 'active' });
+
+            hideModal('friend-modal');
+            listenToOnlineRoom(codeInput);
+
+            // Display Room Bar
+            document.getElementById('room-code-display').innerText = codeInput;
+            document.getElementById('online-room-bar').classList.remove('hidden');
+            showToast("Successfully joined room!", "success");
+
+        } catch (e) {
+            console.error("Error joining room:", e);
+            showToast("Failed to join room.", "error");
+        }
+    }
+
+    function listenToOnlineRoom(code) {
+        if (unsubscribeRoom) unsubscribeRoom();
+
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', code);
+
+        unsubscribeRoom = window.onSnapshot(roomRef, (snapshot) => {
+            if (!snapshot.exists()) return;
+            const data = snapshot.data();
+
+            if (data.status === 'active' && document.getElementById('waiting-modal').classList.contains('flex')) {
+                hideModal('waiting-modal');
+                document.getElementById('room-code-display').innerText = code;
+                document.getElementById('online-room-bar').classList.remove('hidden');
+                showToast("Opponent joined! Game starting.", "success");
+            }
+
+            if (data.snapshot) {
+                // Parse history & sync snapshot
+                if (data.moveHistory) {
+                    moveHistory = JSON.parse(data.moveHistory);
+                }
+                
+                // Update local snapshot timeline
+                const latestSnap = data.snapshot;
+                loadState(latestSnap);
+                gameSnapshots.push(latestSnap);
+                currentSnapshotIndex = gameSnapshots.length - 1;
+                updateUI();
+            }
+        }, (err) => console.error("Snapshot error:", err));
+    }
+
+    async function syncGameToFirestore() {
+        if (!isOnlineMode || !currentRoomCode || !window.db) return;
+        
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', currentRoomCode);
+        
+        try {
+            await window.updateDoc(roomRef, {
+                snapshot: createSnapshot(),
+                moveHistory: JSON.stringify(moveHistory)
+            });
+        } catch (e) {
+            console.error("Error syncing move:", e);
+        }
+    }
+
+    function cancelOnlineWaiting() {
+        hideModal('waiting-modal');
+        if (unsubscribeRoom) {
+            unsubscribeRoom();
+            unsubscribeRoom = null;
+        }
+        isOnlineMode = false;
+        currentRoomCode = null;
+    }
+
+    function copyRoomCode() {
+        if (currentRoomCode) {
+            navigator.clipboard ? navigator.clipboard.writeText(currentRoomCode) : document.execCommand('copy');
+            showToast(`Room Code ${currentRoomCode} copied!`, "success");
+        }
+    }
+
+    function copyWaitingRoomCode() {
+        if (currentRoomCode) {
+            navigator.clipboard ? navigator.clipboard.writeText(currentRoomCode) : document.execCommand('copy');
+            showToast(`Room Code ${currentRoomCode} copied!`, "success");
         }
     }
 
