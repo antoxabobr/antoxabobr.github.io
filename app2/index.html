@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* Tailwind slate-900 */
+            background-color: #0f172a; /* Slate-900 */
             color: #e2e8f0;
             margin: 0;
             display: flex;
@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Container scaling to ensure it never shrinks inappropriately */
         #main-wrapper {
             width: 100%;
             max-width: 1400px;
@@ -34,7 +33,7 @@
 
         #board-wrapper {
             width: 100%;
-            max-width: 75vh; /* Prevents it from getting too large on ultra-wide screens */
+            max-width: 75vh;
             aspect-ratio: 1 / 1;
             margin: 0 auto;
             position: relative;
@@ -62,7 +61,7 @@
             cursor: pointer;
             user-select: none;
             position: relative;
-            container-type: size; /* Container queries for perfectly responsive icons */
+            container-type: size;
         }
 
         .piece {
@@ -70,13 +69,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2.5rem; /* Fallback */
-            font-size: 70cqmin; /* Responsive size based on square size */
+            font-size: 2.5rem;
+            font-size: 70cqmin;
             filter: drop-shadow(0 4px 3px rgba(0,0,0,0.4));
             z-index: 10;
         }
 
-        /* Professional Chess.com style colors */
         .light-square { background-color: #ebecd0; }
         .dark-square { background-color: #739552; }
 
@@ -91,7 +89,7 @@
             transform: translate(-50%, -50%);
             width: 35%;
             height: 35%;
-            background-color: rgba(0, 0, 0, 0.15);
+            background-color: rgba(0, 0, 0, 0.2);
             border-radius: 50%;
             z-index: 5;
         }
@@ -104,7 +102,7 @@
             width: 100%;
             height: 100%;
             box-sizing: border-box;
-            border: 6px solid rgba(0, 0, 0, 0.15);
+            border: 6px solid rgba(0, 0, 0, 0.2);
             border-radius: 50%;
             z-index: 5;
         }
@@ -119,10 +117,7 @@
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
 
-        /* Timer and Move History styling */
-        .timer {
-            font-family: 'JetBrains Mono', monospace;
-        }
+        .timer { font-family: 'JetBrains Mono', monospace; }
 
         #move-history::-webkit-scrollbar { width: 6px; }
         #move-history::-webkit-scrollbar-track { background: transparent; }
@@ -137,18 +132,20 @@
     <!-- Left Column: The Board Area -->
     <div class="flex-1 flex flex-col justify-center items-center bg-slate-800/50 p-4 lg:p-8 rounded-2xl shadow-2xl w-full min-w-[300px]">
         
-        <!-- Top Player Info (Black) -->
+        <!-- Top Player Info -->
         <div class="w-full max-w-[75vh] flex justify-between items-end mb-4 px-1 text-slate-300 font-medium">
             <div class="flex flex-col">
-                <span class="text-lg mb-1"><i class="fa-solid fa-user-astronaut mr-2"></i>Black</span>
-                <span id="black-captured" class="text-sm tracking-widest text-white h-6"></span>
+                <span id="top-player-name" class="text-lg mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-user-astronaut"></i><span id="top-player-label">Black</span>
+                </span>
+                <span id="top-captured" class="text-sm tracking-widest text-white h-6"></span>
             </div>
-            <div id="black-timer" class="timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors">
+            <div id="top-timer" class="timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors">
                 10:00
             </div>
         </div>
         
-        <!-- Board -->
+        <!-- Board Wrapper -->
         <div id="board-wrapper">
             <div id="board"></div>
             
@@ -156,20 +153,20 @@
             <div id="promotion-dialog" class="hidden absolute inset-0 bg-black/60 z-50 flex-col justify-center items-center">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-500 shadow-2xl flex flex-col gap-4">
                     <p class="text-lg text-center font-bold text-white">Promote Pawn To:</p>
-                    <div class="flex gap-4 text-4xl" id="promotion-options">
-                        <!-- Populated by JS -->
-                    </div>
+                    <div class="flex gap-4 text-4xl" id="promotion-options"></div>
                 </div>
             </div>
         </div>
         
-        <!-- Bottom Player Info (White) -->
+        <!-- Bottom Player Info -->
         <div class="w-full max-w-[75vh] flex justify-between items-start mt-4 px-1 text-slate-300 font-medium">
             <div class="flex flex-col">
-                <span class="text-lg mb-1"><i class="fa-solid fa-user mr-2"></i>White</span>
-                <span id="white-captured" class="text-sm tracking-widest text-black h-6 drop-shadow-md"></span>
+                <span id="bottom-player-name" class="text-lg mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i><span id="bottom-player-label">White</span>
+                </span>
+                <span id="bottom-captured" class="text-sm tracking-widest text-white h-6"></span>
             </div>
-            <div id="white-timer" class="timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors">
+            <div id="bottom-timer" class="timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors">
                 10:00
             </div>
         </div>
@@ -184,13 +181,30 @@
                 Chess Master Pro
             </h1>
             
+            <!-- Room Info Bar -->
+            <div id="online-room-bar" class="hidden flex justify-between items-center bg-slate-900/80 px-3 py-2 rounded-lg border border-slate-700">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Room Code:</span>
+                    <span id="room-code-display" class="font-mono text-amber-400 font-bold tracking-widest text-lg">------</span>
+                </div>
+                <button onclick="copyRoomCode()" class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200 transition-colors">
+                    <i class="fa-regular fa-copy mr-1"></i>Copy
+                </button>
+            </div>
+
             <div id="status" class="px-4 py-3 bg-slate-900 rounded-lg font-semibold text-center text-xl border border-slate-700 shadow-inner">
                 White's Turn
             </div>
 
-            <button onclick="showTimeModal()" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i> New Game
-            </button>
+            <div class="flex gap-2">
+                <button onclick="showGameModeModal()" class="flex-1 py-3 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-gamepad"></i> New Game
+                </button>
+                <button onclick="showPlayFriendModal()" class="flex-1 py-3 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <i class="fa-solid fa-users"></i> Play Friend
+                </button>
+            </div>
         </div>
 
         <!-- Move History with Undo/Redo Navigation -->
@@ -200,10 +214,7 @@
                 <span id="history-badge" class="text-xs bg-yellow-600 text-white px-2 py-1 rounded hidden">Viewing Past</span>
             </div>
             
-            <!-- Moves List -->
-            <div id="move-history" class="flex-1 overflow-y-auto p-4 font-mono text-sm bg-slate-800">
-                <!-- Moves populated here -->
-            </div>
+            <div id="move-history" class="flex-1 overflow-y-auto p-4 font-mono text-sm bg-slate-800"></div>
 
             <!-- VCR Controls -->
             <div class="flex justify-between items-center px-4 py-3 bg-slate-900 border-t border-slate-700 text-xl">
@@ -216,33 +227,163 @@
     </div>
 </div>
 
-<!-- Time Control Modal -->
-<div id="time-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 transition-opacity duration-300">
-    <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full transform transition-transform scale-100">
-        <h2 class="text-3xl font-bold mb-6 text-white text-center"><i class="fa-solid fa-stopwatch mr-3 text-blue-400"></i>Select Time</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="startNewGame(60)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">1 min</button>
-            <button onclick="startNewGame(180)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">3 min</button>
-            <button onclick="startNewGame(300)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">5 min</button>
-            <button onclick="startNewGame(600)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">10 min</button>
-            <button onclick="startNewGame(1800)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">30 min</button>
-            <button onclick="startNewGame(Infinity)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg transition-colors border border-slate-600 hover:border-blue-400">Unlimited</button>
+<!-- Game Mode Selection Modal -->
+<div id="mode-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 hidden">
+    <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-6 text-white text-center"><i class="fa-solid fa-chess mr-2 text-blue-400"></i>Start New Game</h2>
+        
+        <div class="flex flex-col gap-4">
+            <button onclick="setupLocalGame()" class="py-4 px-6 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-left text-white border border-slate-600 hover:border-blue-400 transition-all flex items-center justify-between">
+                <div>
+                    <div class="text-lg"><i class="fa-solid fa-user-group mr-2 text-blue-400"></i>Pass & Play (Local)</div>
+                    <div class="text-xs text-slate-400 font-normal mt-0.5">Play on this screen with a friend</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-400"></i>
+            </button>
+
+            <button onclick="showPlayFriendModal()" class="py-4 px-6 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-left text-white border border-slate-600 hover:border-emerald-400 transition-all flex items-center justify-between">
+                <div>
+                    <div class="text-lg"><i class="fa-solid fa-globe mr-2 text-emerald-400"></i>Play a Friend Online</div>
+                    <div class="text-xs text-slate-400 font-normal mt-0.5">Share a 6-digit room code with a friend</div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-400"></i>
+            </button>
         </div>
-        <button onclick="hideTimeModal()" class="mt-6 w-full py-2 text-slate-400 hover:text-white transition-colors">Cancel</button>
+
+        <button onclick="hideModal('mode-modal')" class="mt-6 w-full py-2 text-slate-400 hover:text-white transition-colors">Cancel</button>
     </div>
 </div>
 
-<!-- Alert Modal (Game Over) -->
-<div id="alert-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden justify-center items-center z-50">
+<!-- Play Friend Modal (Create/Join Online) -->
+<div id="friend-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 hidden">
+    <div class="bg-slate-800 p-6 sm:p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-4 text-white text-center"><i class="fa-solid fa-users text-emerald-400 mr-2"></i>Play Online with Friend</h2>
+        
+        <!-- Tabs -->
+        <div class="flex bg-slate-900 p-1 rounded-xl mb-6 border border-slate-700">
+            <button id="tab-btn-create" onclick="switchFriendTab('create')" class="flex-1 py-2 text-sm font-bold rounded-lg transition-colors bg-emerald-600 text-white">Create Game</button>
+            <button id="tab-btn-join" onclick="switchFriendTab('join')" class="flex-1 py-2 text-sm font-bold text-slate-400 rounded-lg hover:text-white transition-colors">Join Game</button>
+        </div>
+
+        <!-- Create Section -->
+        <div id="section-create-game" class="flex flex-col gap-4">
+            <p class="text-sm text-slate-300">Choose time control for your online match:</p>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="selectOnlineTime(180)" class="time-opt-btn py-2.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-white font-bold text-sm">3 min</button>
+                <button onclick="selectOnlineTime(300)" class="time-opt-btn py-2.5 bg-emerald-600 border border-emerald-500 rounded-lg text-white font-bold text-sm">5 min</button>
+                <button onclick="selectOnlineTime(600)" class="time-opt-btn py-2.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-white font-bold text-sm">10 min</button>
+            </div>
+            <button onclick="createOnlineRoom()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-colors mt-2 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Create Room & Get Code
+            </button>
+        </div>
+
+        <!-- Join Section -->
+        <div id="section-join-game" class="hidden flex flex-col gap-4">
+            <p class="text-sm text-slate-300">Enter the 6-digit room code from your friend:</p>
+            <input id="join-code-input" type="text" maxlength="6" placeholder="e.g. 849201" class="w-full text-center tracking-widest font-mono text-2xl uppercase bg-slate-900 text-amber-400 border border-slate-700 rounded-xl py-3 focus:outline-none focus:border-emerald-500">
+            <button onclick="joinOnlineRoom()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-right-to-bracket"></i> Join Game
+            </button>
+        </div>
+
+        <button onclick="hideModal('friend-modal')" class="mt-6 w-full py-2 text-slate-400 hover:text-white transition-colors">Cancel</button>
+    </div>
+</div>
+
+<!-- Waiting Room Modal -->
+<div id="waiting-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 hidden">
+    <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-sm w-full text-center flex flex-col items-center">
+        <div class="w-12 h-12 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin mb-4"></div>
+        <h3 class="text-2xl font-bold text-white mb-2">Waiting for Friend</h3>
+        <p class="text-slate-300 text-sm mb-4">Share this code with your friend to start playing:</p>
+        
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 w-full mb-4 flex justify-between items-center">
+            <span id="waiting-code-display" class="font-mono text-3xl font-bold tracking-widest text-amber-400">------</span>
+            <button onclick="copyWaitingRoomCode()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-600 transition-colors">
+                <i class="fa-regular fa-copy mr-1"></i>Copy
+            </button>
+        </div>
+
+        <button onclick="cancelOnlineWaiting()" class="text-slate-400 hover:text-white text-sm transition-colors mt-2">Cancel Game</button>
+    </div>
+</div>
+
+<!-- Time Control Modal (Local Games) -->
+<div id="time-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 hidden">
+    <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-6 text-white text-center"><i class="fa-solid fa-stopwatch mr-2 text-blue-400"></i>Select Local Game Time</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="startNewGame(60)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">1 min</button>
+            <button onclick="startNewGame(180)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">3 min</button>
+            <button onclick="startNewGame(300)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">5 min</button>
+            <button onclick="startNewGame(600)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">10 min</button>
+            <button onclick="startNewGame(1800)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">30 min</button>
+            <button onclick="startNewGame(Infinity)" class="py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-lg text-white transition-colors border border-slate-600 hover:border-blue-400">Unlimited</button>
+        </div>
+        <button onclick="hideModal('time-modal')" class="mt-6 w-full py-2 text-slate-400 hover:text-white transition-colors">Cancel</button>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div id="alert-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm justify-center items-center z-50 hidden">
     <div class="bg-slate-800 p-8 rounded-2xl border border-slate-600 shadow-2xl max-w-sm w-full text-center">
         <h2 id="alert-title" class="text-3xl font-bold mb-4 text-white"></h2>
         <p id="alert-message" class="text-slate-300 mb-8 text-lg"></p>
         <div class="flex gap-4">
             <button onclick="hideAlertModal()" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors">Review Board</button>
-            <button onclick="showTimeModal()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors">New Game</button>
+            <button onclick="showGameModeModal()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors">New Game</button>
         </div>
     </div>
 </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'chess-master-default';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        apiKey: "demo-api-key",
+        authDomain: "demo.firebaseapp.com",
+        projectId: "demo-project",
+        storageBucket: "demo.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:123456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let authUser = null;
+
+    async function initAuth() {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                authUser = cred.user;
+            } else {
+                const cred = await signInAnonymously(auth);
+                authUser = cred.user;
+            }
+        } catch (e) {
+            console.error("Firebase auth error:", e);
+        }
+    }
+
+    initAuth();
+
+    // Export variables to window for standard chess script accessibility
+    window.db = db;
+    window.appId = appId;
+    window.getAuthUser = () => authUser;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+    window.onSnapshot = onSnapshot;
+    window.updateDoc = updateDoc;
+</script>
 
 <script>
     // Constants
@@ -258,10 +399,10 @@
     };
     const UNICODE_PIECES = {
         'wk': '♔', 'wq': '♕', 'wr': '♖', 'wb': '♗', 'wn': '♘', 'wp': '♙',
-        'bk': '♚', 'bq': '♛', 'br': '♜', 'bb': '♝', 'bn': '♞', 'bp': '♟'
+        'bk': '♚', 'bq': '♛', 'br': '♝', 'bn': '♞', 'bp': '♟'
     };
 
-    // State Variables (These change dynamically)
+    // Game States
     let boardState = [];
     let currentPlayer = COLORS.WHITE;
     let selectedSquare = null;
@@ -275,24 +416,29 @@
     let gameResultText = "White's Turn";
 
     // Timer Variables
-    let initialTimeSetting = Infinity;
-    let timeLeft = { w: Infinity, b: Infinity };
+    let initialTimeSetting = 300;
+    let timeLeft = { w: 300, b: 300 };
     let lastTimerTick = Date.now();
     let gameTimerInterval = null;
 
-    // History & Snapshot Variables for Undo/Redo
+    // History & Snapshot Variables
     let gameSnapshots = [];
-    let moveHistory = []; // Timeline of moves
-    let currentSnapshotIndex = 0; // Where we are in time
+    let moveHistory = [];
+    let currentSnapshotIndex = 0;
+
+    // Online Multiplayer State
+    let isOnlineMode = false;
+    let currentRoomCode = null;
+    let playerColor = COLORS.WHITE; // Default local or White online
+    let unsubscribeRoom = null;
+    let selectedOnlineTime = 300;
 
     // DOM Elements
     const boardElement = document.getElementById('board');
     const statusElement = document.getElementById('status');
     const moveHistoryElement = document.getElementById('move-history');
     const historyBadge = document.getElementById('history-badge');
-    
-    
-    // Helper to deep clone state for snapshots
+
     function cloneBoard(board) {
         return board.map(row => row.map(cell => cell ? {...cell} : null));
     }
@@ -323,21 +469,35 @@
         isGameOver = snapshot.isGameOver;
         gameResultText = snapshot.statusText;
         
-        // Reset selections and promotions
         selectedSquare = null;
         validMovesForSelected = [];
         pendingPromotionMove = null;
         document.getElementById('promotion-dialog').classList.add('hidden');
         
-        lastTimerTick = Date.now(); // Prevent time jumps
+        lastTimerTick = Date.now();
         updateUI();
     }
 
     function startNewGame(timeInSeconds) {
+        if (unsubscribeRoom) {
+            unsubscribeRoom();
+            unsubscribeRoom = null;
+        }
+        isOnlineMode = false;
+        currentRoomCode = null;
+        playerColor = COLORS.WHITE;
+        document.getElementById('online-room-bar').classList.add('hidden');
+
         initialTimeSetting = timeInSeconds;
-        hideTimeModal();
+        hideModal('time-modal');
+        hideModal('mode-modal');
         hideAlertModal();
 
+        resetBoardState();
+        updateUI();
+    }
+
+    function resetBoardState() {
         boardState = [
             [{color: 'b', type: 'r'}, {color: 'b', type: 'n'}, {color: 'b', type: 'b'}, {color: 'b', type: 'q'}, {color: 'b', type: 'k'}, {color: 'b', type: 'b'}, {color: 'b', type: 'n'}, {color: 'b', type: 'r'}],
             [{color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}, {color: 'b', type: 'p'}],
@@ -364,14 +524,11 @@
         timeLeft = { w: initialTimeSetting, b: initialTimeSetting };
         lastTimerTick = Date.now();
         
-        // Initial snapshot
         gameSnapshots = [ createSnapshot() ];
         currentSnapshotIndex = 0;
 
         if (gameTimerInterval) clearInterval(gameTimerInterval);
-        gameTimerInterval = setInterval(gameTick, 100); // 100ms for smooth UI update
-
-        updateUI();
+        gameTimerInterval = setInterval(gameTick, 100);
     }
 
     function formatTime(seconds) {
@@ -389,7 +546,6 @@
 
         if (isGameOver) return;
         
-        // Pause timer if viewing history or no moves made yet
         const isViewingPast = currentSnapshotIndex < gameSnapshots.length - 1;
         if (isViewingPast || moveHistory.length === 0) {
             renderTimers(isViewingPast);
@@ -405,6 +561,7 @@
                 gameResultText = `${winner} wins on time.`;
                 updateUI();
                 showModal("Timeout!", gameResultText);
+                if (isOnlineMode) syncGameToFirestore();
             }
         }
         renderTimers(false);
@@ -414,15 +571,20 @@
         boardElement.innerHTML = '';
         
         let lastMoveSquares = [];
-        // Highlight last move based on the current snapshot index
         if (currentSnapshotIndex > 0 && moveHistory[currentSnapshotIndex - 1]) {
             const lastMv = moveHistory[currentSnapshotIndex - 1];
             lastMoveSquares.push(`${lastMv.from.row}-${lastMv.from.col}`);
             lastMoveSquares.push(`${lastMv.to.row}-${lastMv.to.col}`);
         }
 
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
+        // Orient board according to player color (if online as Black, flip view)
+        const isFlipped = isOnlineMode && playerColor === COLORS.BLACK;
+
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                const row = isFlipped ? 7 - r : r;
+                const col = isFlipped ? 7 - c : c;
+
                 const square = document.createElement('div');
                 square.className = `square ${(row + col) % 2 === 0 ? 'light-square' : 'dark-square'}`;
                 
@@ -476,7 +638,7 @@
             wDiv.className = `w-20 cursor-pointer rounded px-2 font-semibold transition-colors ${wIsActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white'}`;
             wDiv.innerText = wMove.notation;
             wDiv.onclick = () => jumpToSnapshot(i + 1);
-            if(wIsActive) activeEl = wDiv;
+            if (wIsActive) activeEl = wDiv;
             rowDiv.appendChild(wDiv);
 
             // Black Move
@@ -486,7 +648,7 @@
                 bDiv.className = `w-20 cursor-pointer rounded px-2 font-semibold transition-colors ${bIsActive ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`;
                 bDiv.innerText = bMove.notation;
                 bDiv.onclick = () => jumpToSnapshot(i + 2);
-                if(bIsActive) activeEl = bDiv;
+                if (bIsActive) activeEl = bDiv;
             } else {
                 bDiv.className = "w-20";
             }
@@ -503,26 +665,28 @@
     }
 
     function renderTimers(isViewingPast) {
-        const wTimer = document.getElementById('white-timer');
-        const bTimer = document.getElementById('black-timer');
+        const isFlipped = isOnlineMode && playerColor === COLORS.BLACK;
+        const topColor = isFlipped ? COLORS.WHITE : COLORS.BLACK;
+        const bottomColor = isFlipped ? COLORS.BLACK : COLORS.WHITE;
+
+        const topTimer = document.getElementById('top-timer');
+        const bottomTimer = document.getElementById('bottom-timer');
         
-        wTimer.innerText = formatTime(timeLeft.w);
-        bTimer.innerText = formatTime(timeLeft.b);
+        topTimer.innerText = formatTime(timeLeft[topColor]);
+        bottomTimer.innerText = formatTime(timeLeft[bottomColor]);
 
-        // Reset styling
-        wTimer.className = 'timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors text-slate-300';
-        bTimer.className = 'timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors text-slate-300';
+        topTimer.className = 'timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors text-slate-300';
+        bottomTimer.className = 'timer text-3xl px-4 py-2 bg-slate-900 rounded-lg shadow-inner border border-slate-700 transition-colors text-slate-300';
 
-        // Highlight active timer if game is live
         if (!isGameOver && !isViewingPast && moveHistory.length > 0) {
-            if (currentPlayer === COLORS.WHITE) {
-                wTimer.classList.replace('bg-slate-900', 'bg-slate-700');
-                wTimer.classList.replace('text-slate-300', 'text-yellow-400');
-                wTimer.classList.replace('border-slate-700', 'border-yellow-600');
+            if (currentPlayer === topColor) {
+                topTimer.classList.replace('bg-slate-900', 'bg-slate-700');
+                topTimer.classList.replace('text-slate-300', 'text-yellow-400');
+                topTimer.classList.replace('border-slate-700', 'border-yellow-600');
             } else {
-                bTimer.classList.replace('bg-slate-900', 'bg-slate-700');
-                bTimer.classList.replace('text-slate-300', 'text-yellow-400');
-                bTimer.classList.replace('border-slate-700', 'border-yellow-600');
+                bottomTimer.classList.replace('bg-slate-900', 'bg-slate-700');
+                bottomTimer.classList.replace('text-slate-300', 'text-yellow-400');
+                bottomTimer.classList.replace('border-slate-700', 'border-yellow-600');
             }
         }
     }
@@ -538,19 +702,43 @@
     }
 
     function updateUI() {
+        // Adjust player labels & icons according to board orientation
+        const isFlipped = isOnlineMode && playerColor === COLORS.BLACK;
+        const topLabel = document.getElementById('top-player-label');
+        const bottomLabel = document.getElementById('bottom-player-label');
+        
+        if (isFlipped) {
+            topLabel.innerText = "White (Opponent)";
+            bottomLabel.innerText = "Black (You)";
+        } else if (isOnlineMode) {
+            topLabel.innerText = "Black (Opponent)";
+            bottomLabel.innerText = "White (You)";
+        } else {
+            topLabel.innerText = "Black";
+            bottomLabel.innerText = "White";
+        }
+
         renderBoard();
         renderMoveHistoryList();
         updateNavigationButtons();
         
-        // Update Captured Pieces display (sorted by value)
+        // Render Captured Pieces
         const sortOrder = { 'q': 1, 'r': 2, 'b': 3, 'n': 4, 'p': 5 };
         const wCap = [...capturedPieces.w].sort((a,b) => sortOrder[a.type] - sortOrder[b.type]);
         const bCap = [...capturedPieces.b].sort((a,b) => sortOrder[a.type] - sortOrder[b.type]);
         
-        document.getElementById('white-captured').innerText = wCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
-        document.getElementById('black-captured').innerText = bCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
+        const topCapEl = document.getElementById('top-captured');
+        const bottomCapEl = document.getElementById('bottom-captured');
 
-        // Status coloring
+        if (isFlipped) {
+            topCapEl.innerText = bCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
+            bottomCapEl.innerText = wCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
+        } else {
+            topCapEl.innerText = wCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
+            bottomCapEl.innerText = bCap.map(p => UNICODE_PIECES[p.color+p.type]).join('');
+        }
+
+        // Status banner updates
         statusElement.innerText = gameResultText;
         if (isGameOver) {
             if (gameResultText.includes('Checkmate') || gameResultText.includes('Timeout')) {
@@ -575,7 +763,12 @@
     function handleSquareClick(row, col) {
         if (isGameOver || pendingPromotionMove) return;
 
-        // If playing from the past, interacting means we want to fork/overwrite future moves
+        // In online mode, you can only move your own pieces on your turn!
+        if (isOnlineMode) {
+            if (currentPlayer !== playerColor) return; // Not your turn
+            if (currentSnapshotIndex < gameSnapshots.length - 1) return; // Cannot play from history
+        }
+
         const clickedPiece = boardState[row][col];
         
         if (selectedSquare) {
@@ -602,7 +795,6 @@
         }
     }
 
-    // Pseudo-legal moves (copied from original, fully working)
     function getPseudoLegalMoves(row, col, color, type, board) {
         let moves = [];
         const directions = {
@@ -730,12 +922,11 @@
     }
 
     function executeMove(from, to, moveDetails) {
-        
-        // ** CRITICAL: Overwrite History if we are in the past! **
-        if (currentSnapshotIndex < gameSnapshots.length - 1) {
+        // In local mode, if we were viewing history, truncate timeline
+        if (!isOnlineMode && currentSnapshotIndex < gameSnapshots.length - 1) {
             gameSnapshots = gameSnapshots.slice(0, currentSnapshotIndex + 1);
             moveHistory = moveHistory.slice(0, currentSnapshotIndex);
-            isGameOver = false; // The timeline continues!
+            isGameOver = false;
         }
 
         const piece = boardState[from.row][from.col];
@@ -770,7 +961,6 @@
             }
         }
 
-        // Update Castling Rights
         if (piece.type === PIECE_TYPES.KING) {
             if (piece.color === COLORS.WHITE) { castlingRights.wK = false; castlingRights.wQ = false; }
             else { castlingRights.bK = false; castlingRights.bQ = false; }
@@ -803,7 +993,6 @@
             piece.type = promotedType; 
         }
 
-        // Create notation
         let notation = '';
         const getAlg = (r, c) => `${['a','b','c','d','e','f','g','h'][c]}${8-r}`;
         
@@ -820,25 +1009,27 @@
             if (promotedType) notation += `=${promotedType.toUpperCase()}`;
         }
 
-        // Check for end of game BEFORE saving snapshot so snapshot has correct status
         currentPlayer = currentPlayer === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE;
         checkGameEndStatus();
 
-        if(isGameOver) notation += '#';
-        else if(isKingInCheck(currentPlayer, boardState)) notation += '+';
+        if (isGameOver) notation += '#';
+        else if (isKingInCheck(currentPlayer, boardState)) notation += '+';
 
-        // Add to history list
         moveHistory.push({ from, to, piece, notation, color: piece.color });
 
-        // Save State
         gameSnapshots.push(createSnapshot());
         currentSnapshotIndex = gameSnapshots.length - 1;
         
         selectedSquare = null;
         validMovesForSelected = [];
-        lastTimerTick = Date.now(); // Sync time
+        lastTimerTick = Date.now();
 
         updateUI();
+
+        // Sync move over network if online
+        if (isOnlineMode) {
+            syncGameToFirestore();
+        }
     }
 
     function checkGameEndStatus() {
@@ -896,39 +1087,226 @@
         document.getElementById('promotion-dialog').classList.add('flex');
     }
 
-    function showModal(title, message) {
-        document.getElementById('alert-title').innerText = title;
-        document.getElementById('alert-message').innerText = message;
-        const alertModal = document.getElementById('alert-modal');
-        alertModal.classList.remove('hidden');
-        alertModal.classList.add('flex');
+    function generateRoomCode() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    function hideAlertModal() {
-        const alertModal = document.getElementById('alert-modal');
-        alertModal.classList.add('hidden');
-        alertModal.classList.remove('flex');
+    function selectOnlineTime(seconds) {
+        selectedOnlineTime = seconds;
+        document.querySelectorAll('.time-opt-btn').forEach(btn => {
+            btn.classList.remove('bg-emerald-600', 'border-emerald-500');
+            btn.classList.add('bg-slate-700', 'border-slate-600');
+        });
+        event.target.classList.remove('bg-slate-700', 'border-slate-600');
+        event.target.classList.add('bg-emerald-600', 'border-emerald-500');
     }
 
-    function showTimeModal() {
-        const modal = document.getElementById('time-modal');
-        modal.classList.remove('hidden', 'opacity-0');
-        modal.classList.add('flex', 'opacity-100');
+    async function createOnlineRoom() {
+        if (!window.db) {
+            alert("Connection error. Please try again.");
+            return;
+        }
+
+        const roomCode = generateRoomCode();
+        currentRoomCode = roomCode;
+        playerColor = COLORS.WHITE;
+        isOnlineMode = true;
+        initialTimeSetting = selectedOnlineTime;
+
+        resetBoardState();
+
+        document.getElementById('waiting-code-display').innerText = roomCode;
+        hideModal('friend-modal');
+        showModal('waiting-modal');
+
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', roomCode);
+
+        const initialDocData = {
+            roomCode: roomCode,
+            status: 'waiting',
+            timeSetting: selectedOnlineTime,
+            snapshot: createSnapshot(),
+            moveHistory: JSON.stringify(moveHistory),
+            createdAt: Date.now()
+        };
+
+        try {
+            await window.setDoc(roomRef, initialDocData);
+            listenToOnlineRoom(roomCode);
+        } catch (e) {
+            console.error("Error creating room:", e);
+            alert("Failed to create room.");
+        }
+    }
+
+    async function joinOnlineRoom() {
+        const codeInput = document.getElementById('join-code-input').value.trim();
+        if (!codeInput || codeInput.length !== 6) {
+            alert("Please enter a valid 6-digit room code.");
+            return;
+        }
+
+        if (!window.db) return;
+
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', codeInput);
+
+        try {
+            const snap = await window.getDoc(roomRef);
+            if (!snap.exists()) {
+                alert("Room not found! Please check the code.");
+                return;
+            }
+
+            const data = snap.data();
+            if (data.status === 'active') {
+                alert("This room is already full.");
+                return;
+            }
+
+            currentRoomCode = codeInput;
+            playerColor = COLORS.BLACK;
+            isOnlineMode = true;
+
+            await window.updateDoc(roomRef, { status: 'active' });
+
+            hideModal('friend-modal');
+            listenToOnlineRoom(codeInput);
+
+            // Display Room Bar
+            document.getElementById('room-code-display').innerText = codeInput;
+            document.getElementById('online-room-bar').classList.remove('hidden');
+
+        } catch (e) {
+            console.error("Error joining room:", e);
+            alert("Failed to join room.");
+        }
+    }
+
+    function listenToOnlineRoom(code) {
+        if (unsubscribeRoom) unsubscribeRoom();
+
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', code);
+
+        unsubscribeRoom = window.onSnapshot(roomRef, (snapshot) => {
+            if (!snapshot.exists()) return;
+            const data = snapshot.data();
+
+            if (data.status === 'active' && document.getElementById('waiting-modal').classList.contains('flex')) {
+                hideModal('waiting-modal');
+                document.getElementById('room-code-display').innerText = code;
+                document.getElementById('online-room-bar').classList.remove('hidden');
+            }
+
+            if (data.snapshot) {
+                // Parse history & sync snapshot
+                if (data.moveHistory) {
+                    moveHistory = JSON.parse(data.moveHistory);
+                }
+                
+                // Update local snapshot timeline
+                const latestSnap = data.snapshot;
+                loadState(latestSnap);
+                gameSnapshots.push(latestSnap);
+                currentSnapshotIndex = gameSnapshots.length - 1;
+                updateUI();
+            }
+        }, (err) => console.error("Snapshot error:", err));
+    }
+
+    async function syncGameToFirestore() {
+        if (!isOnlineMode || !currentRoomCode || !window.db) return;
+        
+        const roomRef = window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'games', currentRoomCode);
+        
+        try {
+            await window.updateDoc(roomRef, {
+                snapshot: createSnapshot(),
+                moveHistory: JSON.stringify(moveHistory)
+            });
+        } catch (e) {
+            console.error("Error syncing move:", e);
+        }
+    }
+
+    function cancelOnlineWaiting() {
+        hideModal('waiting-modal');
+        if (unsubscribeRoom) {
+            unsubscribeRoom();
+            unsubscribeRoom = null;
+        }
+        isOnlineMode = false;
+        currentRoomCode = null;
+    }
+
+    function copyRoomCode() {
+        if (currentRoomCode) {
+            navigator.clipboard ? navigator.clipboard.writeText(currentRoomCode) : document.execCommand('copy');
+            alert(`Room Code ${currentRoomCode} copied to clipboard!`);
+        }
+    }
+
+    function copyWaitingRoomCode() {
+        if (currentRoomCode) {
+            navigator.clipboard ? navigator.clipboard.writeText(currentRoomCode) : document.execCommand('copy');
+            alert(`Room Code ${currentRoomCode} copied to clipboard!`);
+        }
+    }
+
+    function showGameModeModal() { showModal('mode-modal'); }
+    function showPlayFriendModal() {
+        hideModal('mode-modal');
+        showModal('friend-modal');
+    }
+
+    function setupLocalGame() {
+        hideModal('mode-modal');
+        showModal('time-modal');
+    }
+
+    function switchFriendTab(tab) {
+        const createBtn = document.getElementById('tab-btn-create');
+        const joinBtn = document.getElementById('tab-btn-join');
+        const createSec = document.getElementById('section-create-game');
+        const joinSec = document.getElementById('section-join-game');
+
+        if (tab === 'create') {
+            createBtn.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-colors bg-emerald-600 text-white";
+            joinBtn.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-lg hover:text-white transition-colors";
+            createSec.classList.remove('hidden');
+            joinSec.classList.add('hidden');
+        } else {
+            joinBtn.className = "flex-1 py-2 text-sm font-bold rounded-lg transition-colors bg-emerald-600 text-white";
+            createBtn.className = "flex-1 py-2 text-sm font-bold text-slate-400 rounded-lg hover:text-white transition-colors";
+            joinSec.classList.remove('hidden');
+            createSec.classList.add('hidden');
+        }
+    }
+
+    function showModal(id) {
+        const modal = document.getElementById(id);
+        if(modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
     }
     
-    function hideTimeModal() {
-        const modal = document.getElementById('time-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    function hideModal(id) {
+        const modal = document.getElementById(id);
+        if(modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
 
-    // Navigation Buttons
+    function hideAlertModal() { hideModal('alert-modal'); }
+
+    // Navigation Controls
     document.getElementById('btn-start').addEventListener('click', () => jumpToSnapshot(0));
     document.getElementById('btn-prev').addEventListener('click', () => jumpToSnapshot(currentSnapshotIndex - 1));
     document.getElementById('btn-next').addEventListener('click', () => jumpToSnapshot(currentSnapshotIndex + 1));
     document.getElementById('btn-end').addEventListener('click', () => jumpToSnapshot(gameSnapshots.length - 1));
 
-    // Keyboard support for history navigation
+    // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') jumpToSnapshot(currentSnapshotIndex - 1);
         if (e.key === 'ArrowRight') jumpToSnapshot(currentSnapshotIndex + 1);
@@ -936,9 +1314,9 @@
         if (e.key === 'ArrowDown') jumpToSnapshot(gameSnapshots.length - 1);
     });
 
-    // Initialize on load
-    window.onload = showTimeModal;
-
+    window.onload = () => {
+        startNewGame(300); // Default 5 min game
+    };
 </script>
 </body>
 </html>
