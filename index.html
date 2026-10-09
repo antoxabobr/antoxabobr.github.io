@@ -567,4 +567,107 @@
         };
 
         const app = {
-<!-- ... existing code -->
+            currentTopic: null,
+
+            init() {
+                this.setupTheme();
+                this.navigate('home');
+            },
+
+            navigate(view, topicId = null) {
+                const homeView = document.getElementById('view-home');
+                const topicView = document.getElementById('view-topic');
+                const backBtn = document.getElementById('btn-back-home');
+                const navContainer = document.getElementById('nav-menu-container');
+
+                if (view === 'home') {
+                    this.currentTopic = null;
+                    homeView.classList.add('active');
+                    homeView.style.display = 'block';
+                    topicView.classList.remove('active');
+                    topicView.style.display = 'none';
+                    if (backBtn) {
+                        backBtn.classList.add('hidden');
+                        backBtn.classList.remove('md:flex');
+                    }
+                    if (navContainer) navContainer.innerHTML = '';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else if (view === 'topic' && topicId) {
+                    this.currentTopic = topicId;
+                    homeView.classList.remove('active');
+                    homeView.style.display = 'none';
+                    topicView.classList.add('active');
+                    topicView.style.display = 'block';
+
+                    // Hide all topic contents and show the target topic content
+                    document.querySelectorAll('.topic-content').forEach(el => el.classList.add('hidden'));
+                    const activeTopicEl = document.getElementById(`topic-${topicId}`);
+                    if (activeTopicEl) {
+                        activeTopicEl.classList.remove('hidden');
+                    }
+
+                    // Show back button in header
+                    if (backBtn) {
+                        backBtn.classList.remove('hidden');
+                        backBtn.classList.add('md:flex');
+                    }
+
+                    // Render sub-navigation in navbar
+                    this.renderNavMenu(topicId);
+
+                    // Re-render MathJax formulas if available
+                    if (window.MathJax && MathJax.typesetPromise) {
+                        MathJax.typesetPromise();
+                    }
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            },
+
+            renderNavMenu(topicId) {
+                const navContainer = document.getElementById('nav-menu-container');
+                if (!navContainer) return;
+                const items = navigationData[topicId] || [];
+                navContainer.innerHTML = items.map(item => `
+                    <button onclick="app.scrollToSection('${item.id}')" class="px-3 py-1.5 rounded-md text-sm font-medium text-slate-600 hover:text-physics-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-physics-400 dark:hover:bg-slate-800 transition-colors">
+                        ${item.label}
+                    </button>
+                `).join('');
+            },
+
+            scrollToSection(id) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            },
+
+            setupTheme() {
+                const themeToggle = document.getElementById('themeToggle');
+                
+                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+
+                if (themeToggle) {
+                    themeToggle.onclick = () => {
+                        if (document.documentElement.classList.contains('dark')) {
+                            document.documentElement.classList.remove('dark');
+                            localStorage.theme = 'light';
+                        } else {
+                            document.documentElement.classList.add('dark');
+                            localStorage.theme = 'dark';
+                        }
+                    };
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
