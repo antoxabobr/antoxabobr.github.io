@@ -303,6 +303,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                            <h3 class="text-md font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                                <i class="ph ph-atom text-physics-500"></i> Микроскопическое движение зарядов
+                            </h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                                За время $t$ сквозь поперечное сечение $S$ пройдёт цилиндр электронов длиной $v t$ и объёмом $V = v t S$. При концентрации электронов $n$ проходящий заряд равен $Q = v t S n q$.
+                            </p>
+                            <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center font-mono text-lg md:text-xl text-physics-600 dark:text-physics-400 font-semibold">
+                                $$I = v \cdot S \cdot n \cdot q$$
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">
+                                <div><span class="font-mono font-bold text-slate-700 dark:text-slate-300">v</span> — скорость дрейфа</div>
+                                <div><span class="font-mono font-bold text-slate-700 dark:text-slate-300">S</span> — площадь сечения</div>
+                                <div><span class="font-mono font-bold text-slate-700 dark:text-slate-300">n</span> — концентрация</div>
+                                <div><span class="font-mono font-bold text-slate-700 dark:text-slate-300">q</span> — заряд частицы</div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -334,6 +352,96 @@
                                 <p><span class="font-mono text-physics-600 dark:text-physics-400">Q</span> — заряд, в кулонах (Кл)</p>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- 3.5 МИКРОСКОПИЧЕСКИЙ ВЫВОД ЗАКОНА ОМА (ЛЕКЦИЯ) -->
+                <section id="derivation" class="scroll-mt-24 topic-section">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                            <i class="ph ph-flask font-bold text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Вывод закона Ома</h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Теоретический вывод из гипотезы о силе сопротивления</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800/50 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-700/50 space-y-8">
+                        
+                        <!-- Step 1: Hypothesis -->
+                        <div class="bg-purple-50/60 dark:bg-purple-950/20 p-5 rounded-xl border border-purple-100 dark:border-purple-900/40">
+                            <h3 class="text-base font-bold text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2">
+                                <i class="ph ph-lightbulb text-purple-600 dark:text-purple-400"></i> Гипотеза о силе сопротивления
+                            </h3>
+                            <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-3">
+                                Предположим, что сила сопротивления движению электронов в проводнике пропорциональна их скорости движения $v$:
+                            </p>
+                            <div class="text-center font-mono text-lg text-purple-800 dark:text-purple-300 bg-white/80 dark:bg-slate-900/60 py-2 rounded-lg border border-purple-200 dark:border-purple-800">
+                                $$F_{\text{сопр}} = k \cdot v$$
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Equilibrium velocity -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">1. Установившаяся скорость электронов</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                                Электроны ускоряются электрической силой $F_{\text{электр}}$, пока она не уравновесится силой сопротивления $F_{\text{сопр}} = F_{\text{электр}}$:
+                            </p>
+                            <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-center font-mono text-xl text-slate-800 dark:text-slate-200">
+                                $$v = \frac{F_{\text{электр}}}{k}$$
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Relation to Voltage -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">2. Связь электрической силы с напряжением</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                                Так как напряжение $U = \frac{A}{q} = \frac{F_{\text{электр}} \cdot L}{q}$, выразим силу $F_{\text{электр}}$ и подставим её в выражение для скорости:
+                            </p>
+                            <div class="grid md:grid-cols-2 gap-4 font-mono text-center">
+                                <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    $$F_{\text{электр}} = \frac{U \cdot q}{L}$$
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-physics-600 dark:text-physics-400 font-bold">
+                                    $$v = \frac{U \cdot q}{L \cdot k}$$
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Final Substitution -->
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">3. Подстановка скорости в формулу тока</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                                Подставим скорость $v$ в микроскопическое выражение для силы тока $I = v S n q$:
+                            </p>
+                            <div class="bg-physics-50 dark:bg-physics-900/20 p-6 rounded-xl border border-physics-200 dark:border-physics-800 text-center font-mono text-xl md:text-2xl text-physics-700 dark:text-physics-300 font-bold mb-4">
+                                $$I = \left(\frac{U \cdot q}{L \cdot k}\right) \cdot S \cdot n \cdot q = U \cdot \frac{S}{L} \cdot \frac{n \cdot q^2}{k}$$
+                            </div>
+                        </div>
+
+                        <!-- Step 5: Physical meaning of R and rho -->
+                        <div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">4. Физический смысл сопротивления $\rho$ и $R$</h3>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                                Сравнивая полученную формулу с законом Ома $I = \frac{U}{R}$, получаем выражения для сопротивления и удельного сопротивления:
+                            </p>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="bg-emerald-50 dark:bg-emerald-950/20 p-5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 text-center">
+                                    <div class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-bold mb-2">Сопротивление проводника</div>
+                                    <div class="font-mono text-xl text-slate-800 dark:text-slate-200">
+                                        $$R = \frac{L}{S} \cdot \left( \frac{k}{n \cdot q^2} \right)$$
+                                    </div>
+                                </div>
+                                <div class="bg-emerald-50 dark:bg-emerald-950/20 p-5 rounded-xl border border-emerald-200 dark:border-emerald-900/40 text-center">
+                                    <div class="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide font-bold mb-2">Удельное сопротивление $\rho$</div>
+                                    <div class="font-mono text-xl text-physics-600 dark:text-physics-400 font-bold">
+                                        $$\rho = \frac{k}{n \cdot q^2}$$
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
 
@@ -386,9 +494,11 @@
                         <div class="bg-physics-600 dark:bg-physics-900 rounded-2xl p-6 shadow-lg text-white h-full">
                             <div class="grid grid-cols-2 gap-4 text-center font-mono text-lg">
                                 <div class="bg-white/10 rounded-lg py-3">$$I = \frac{Q}{t}$$</div>
+                                <div class="bg-white/10 rounded-lg py-3">$$I = v S n q$$</div>
                                 <div class="bg-white/10 rounded-lg py-3">$$U = \frac{A}{Q}$$</div>
                                 <div class="bg-white/10 rounded-lg py-3">$$I = \frac{U}{R}$$</div>
                                 <div class="bg-white/10 rounded-lg py-3">$$R = \rho \cdot \frac{L}{S}$$</div>
+                                <div class="bg-white/10 rounded-lg py-3">$$\rho = \frac{k}{n q^2}$$</div>
                             </div>
                         </div>
                     </section>
@@ -448,6 +558,7 @@
                 { id: 'charge', label: 'Заряд' },
                 { id: 'current', label: 'Ток' },
                 { id: 'voltage', label: 'Напряжение' },
+                { id: 'derivation', label: 'Вывод Ома' },
                 { id: 'ohm', label: 'Закон Ома' },
                 { id: 'formulas', label: 'Формулы' }
             ]
@@ -456,138 +567,4 @@
         };
 
         const app = {
-            currentView: 'home',
-            currentTopic: null,
-
-            // Router function
-            navigate: function(view, topicId = null) {
-                // 1. Hide all views
-                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-                
-                // 2. Show the requested view
-                const viewEl = document.getElementById(`view-${view}`);
-                if (viewEl) viewEl.classList.add('active');
-
-                this.currentView = view;
-                this.currentTopic = topicId;
-
-                // 3. Handle specific view logic
-                if (view === 'home') {
-                    // Hide back button, clear specific nav links
-                    document.getElementById('btn-back-home').classList.add('hidden');
-                    document.getElementById('nav-menu-container').innerHTML = '';
-                    window.scrollTo(0, 0);
-                } 
-                else if (view === 'topic' && topicId) {
-                    // Show back button
-                    document.getElementById('btn-back-home').classList.remove('hidden');
-                    
-                    // Hide all topic contents, show the selected one
-                    document.querySelectorAll('.topic-content').forEach(el => el.classList.add('hidden'));
-                    const activeTopicContent = document.getElementById(`topic-${topicId}`);
-                    if (activeTopicContent) activeTopicContent.classList.remove('hidden');
-
-                    // Build navigation links for this specific topic
-                    this.buildNavigation(topicId);
-                    
-                    window.scrollTo(0, 0);
-                    
-                    // Re-typeset MathJax just in case content was dynamically inserted
-                    if (window.MathJax) {
-                        MathJax.typesetPromise();
-                    }
-                }
-            },
-
-            // Build dynamic navigation links for the top bar
-            buildNavigation: function(topicId) {
-                const container = document.getElementById('nav-menu-container');
-                container.innerHTML = '';
-                
-                const links = navigationData[topicId];
-                if (!links) return;
-
-                links.forEach(link => {
-                    const a = document.createElement('a');
-                    a.href = `#${link.id}`;
-                    a.className = `px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-physics-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-physics-400 dark:hover:bg-slate-800 transition-colors nav-link`;
-                    a.dataset.target = link.id;
-                    a.innerText = link.label;
-                    
-                    // Smooth scroll override to handle offset
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const targetEl = document.getElementById(link.id);
-                        if (targetEl) {
-                            targetEl.scrollIntoView({ behavior: 'smooth' });
-                            // Update active state manually after click
-                            this.updateActiveNavLink(link.id);
-                        }
-                    });
-
-                    container.appendChild(a);
-                });
-            },
-
-            updateActiveNavLink: function(activeId) {
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    if (link.dataset.target === activeId) {
-                        link.classList.add('text-physics-600', 'bg-slate-100', 'dark:text-physics-400', 'dark:bg-slate-800');
-                    } else {
-                        link.classList.remove('text-physics-600', 'bg-slate-100', 'dark:text-physics-400', 'dark:bg-slate-800');
-                    }
-                });
-            }
-        };
-
-        // Scroll spy logic for active navigation highlighting
-        window.addEventListener('scroll', () => {
-            if (app.currentView !== 'topic') return;
-
-            let current = '';
-            // Only select sections that belong to the current visible topic
-            const activeTopicContainer = document.getElementById(`topic-${app.currentTopic}`);
-            if (!activeTopicContainer) return;
-
-            const sections = activeTopicContainer.querySelectorAll('.topic-section');
-            
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (window.scrollY >= sectionTop - 120) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            if (current) {
-                app.updateActiveNavLink(current);
-            }
-        });
-
-        // Dark mode toggle functionality
-        const themeToggleBtn = document.getElementById('themeToggle');
-        
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        themeToggleBtn.addEventListener('click', function() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-        });
-
-        // Initialize App on load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Start on home view
-            app.navigate('home');
-        });
-
-    </script>
-</body>
-</html>
+<!-- ... existing code -->
