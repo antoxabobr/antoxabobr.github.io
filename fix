@@ -235,6 +235,9 @@
     <div id="toast-container" class="absolute top-20 left-0 w-full flex flex-col items-center z-50"></div>
 
     <script>
+        // Global word dictionary initialized
+        const VALID_WORDS = new Set();
+
         // Thousands of built-in 5-letter words packed directly into memory
         // Works 100% offline, locally, or without server dependencies
         const EMBEDDED_WORDS_RAW = `
@@ -559,14 +562,11 @@ YOGA0YOGI0YOKEL0YOKES0YOLKS0YOUNG0YOURS0YOUTH0ZEBRA0ZEST0ZESTY0
 ZILCH0ZINCS0ZIPPY0ZOMBIE0ZONES0ZOOMS
 `;
 
-        // Parse and generate dictionary dynamically from the massive packed dataset
+        // Parse and generate dictionary dynamically from the dataset using regex
         function buildFullDictionary() {
-            const raw = EMBEDDED_WORDS_RAW.replace(/\s+/g, '');
-            for (let i = 0; i < raw.length; i += 5) {
-                const word = raw.substr(i, 5);
-                if (word.length === 5 && /^[A-Z]{5}$/.test(word)) {
-                    VALID_WORDS.add(word);
-                }
+            const matches = EMBEDDED_WORDS_RAW.match(/[A-Za-z]{5}/g);
+            if (matches) {
+                matches.forEach(w => VALID_WORDS.add(w.toUpperCase()));
             }
         }
         buildFullDictionary();
@@ -622,17 +622,12 @@ ZILCH0ZINCS0ZIPPY0ZOMBIE0ZONES0ZOOMS
             e.target.value = val;
             
             if (val.length === WORD_LENGTH) {
-                if (VALID_WORDS.has(val)) {
-                    setupError.style.opacity = '0';
-                    startBtn.disabled = false;
-                    startBtn.classList.remove('opacity-50', 'bg-[#818384]', 'cursor-not-allowed');
-                    startBtn.classList.add('bg-[#538d4e]', 'hover:bg-[#43723f]', 'cursor-pointer');
-                } else {
-                    setupError.textContent = "Not in word list";
-                    setupError.style.opacity = '1';
-                    startBtn.disabled = true;
-                    resetStartButton();
-                }
+                // Ensure secret word is registered in dictionary for Player 2
+                VALID_WORDS.add(val);
+                setupError.style.opacity = '0';
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50', 'bg-[#818384]', 'cursor-not-allowed');
+                startBtn.classList.add('bg-[#538d4e]', 'hover:bg-[#43723f]', 'cursor-pointer');
             } else {
                 setupError.style.opacity = '0';
                 startBtn.disabled = true;
