@@ -1,408 +1,577 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
-// A minimal dictionary for demonstration purposes.
-// In a real application, you might want to fetch a larger JSON file or use an API.
-const VALID_WORDS = new Set([
-  "CIGAR", "REBUT", "SISSY", "HUMPH", "AWAKE", "BLUSH", "FOCAL", "EVADE", "NAVAL", "SERVE",
-  "HEATH", "DWARF", "MODEL", "KARMA", "STINK", "GRADE", "QUIET", "BENCH", "ABATE", "FEIGN",
-  "MAJOR", "DEATH", "FRESH", "CRUST", "STOOL", "COLON", "ABASE", "MARRY", "REACT", "BATTY",
-  "PRIDE", "FLOSS", "HELIX", "CROAK", "STAFF", "PAPER", "UNFED", "WHELP", "TRAWL", "OUTDO",
-  "APPLE", "TRAIN", "HOUSE", "MOUSE", "SMILE", "PLANT", "WATER", "LIGHT", "RIGHT", "NIGHT",
-  "MIGHT", "FIGHT", "SIGHT", "TIGHT", "GHOST", "TOAST", "ROAST", "COAST", "BOAST", "BEAST",
-  "FEAST", "LEAST", "YEAST", "GUEST", "QUEST", "CHEST", "CREST", "BLAST", "TRUST", "CRUST",
-  "RUSTY", "DUSTY", "MUSTY", "GUSTY", "LUSTY", "BUST", "JUST", "MUST", "GUST", "DUST",
-  "LUST", "RUST", "FAST", "PAST", "LAST", "MAST", "CAST", "VAST", "WEST", "NEST",
-  "PEST", "REST", "TEST", "BEST", "ZEST", "POST", "HOST", "LOST", "COST", "FROST",
-  "GHOST", "WORDS", "WORDY", "WORLD", "HELLO", "WORLD", "SWEET", "HEART", "SMART", "BRAIN",
-  "THINK", "DRINK", "BLINK", "STINK", "BRING", "THING", "SWING", "STING", "FLING", "SLING",
-  "CLING", "WRING", "SPRING", "STRING", "STRONG", "WRONG", "ALONG", "SONG", "GONG", "LONG",
-  "PONG", "TONG", "MONG", "HONG", "KONG", "DONG", "BONG", "ZONG", "VONG", "YONG",
-  "XONG", "QONG", "WONG", "RONG", "MONG", "NONG", "JONG", "FONG", "GONG", "CHONG",
-  "SHONG", "THONG", "PHONG", "WHONG", "KHONG", "ZHONG", "JHONG", "GHONG", "VHONG", "YHONG",
-  "XHONG", "QHONG", "EHONG", "IHONG", "OHONG", "UHONG", "AHONG", "ZHONG", "CHONG", "SHONG",
-  "THONG", "PHONG", "WHONG", "KHONG", "ZHONG", "JHONG", "GHONG", "VHONG", "YHONG", "XHONG",
-  "QHONG", "EHONG", "IHONG", "OHONG", "UHONG", "AHONG", "GAMES", "GAMER", "GAMED", "GAMIN",
-  "GAMIC", "GAMAY", "GAMBA", "GAMBE", "GAMBO", "GAMBS", "GAMER", "GAMES", "GAMEY", "GAMIC",
-  "GAMIN", "GAMMA", "GAMME", "GAMMY", "GAMPS", "GAMUT", "GANAS", "GANCH", "GANDA", "GANEF",
-  "GANEV", "GANGS", "GANJA", "GANKS", "GANOF", "GANTS", "GARBA", "GARBE", "GARBO", "GARBS",
-  "GARDA", "GARNI", "GARRE", "GARTH", "GARUM", "GASES", "GASPS", "GASPY", "GASTS", "GATCH",
-  "GATED", "GATER", "GATES", "GATHS", "GATOR", "GAUDS", "GAUDY", "GAUGE", "GAULS", "GAUNT",
-  "GAURS", "GAUSS", "GAUZE", "GAUZY", "GAVEL", "GAVOT", "GAWKS", "GAWKY", "GAWPS", "GAWSY",
-  "GAYAL", "GAYER", "GAYLY", "GAZAL", "GAZAR", "GAZED", "GAZER", "GAZES", "GAZON", "GAZOO",
-  "GEARS", "GECKO", "GECKS", "GEEKS", "GEEKY", "GEEPS", "GEESE", "GEEST", "GEIST", "GELDS",
-  "GELEE", "GELID", "GELLY", "GELTS", "GEMMA", "GEMMY", "GEMOT", "GENAL", "GENAS", "GENES",
-  "GENET", "GENIC", "GENIE", "GENII", "GENIP", "GENOA", "GENOM", "GENOS", "GENRO", "GENTS",
-  "GENUA", "GENUS", "GEODE", "GEOID", "GERAH", "GERBS", "GERMI", "GERMS", "GERMY", "GESSE",
-  "GESSO", "GESTE", "GESTS", "GETAS", "GETUP", "GEUMS", "GHATS", "GHAUT", "GHAZI", "GHEES",
-  "GHOST", "GHOUL", "GIANT", "GIBED", "GIBER", "GIBES", "GIDDY", "GIFTS", "GIGAS", "GIGHE",
-  "GIGOT", "GIGUE", "GILDS", "GILLS", "GILLY", "GILTS", "GIMEL", "GIMME", "GIMPS", "GIMPY",
-  "GINCH", "GINGE", "GINGS", "GINKS", "GINNY", "GINZO", "GIPON", "GIPSY", "GIRDS", "GIRLS",
-  "GIRLY", "GIRNS", "GIRON", "GIROS", "GIRSH", "GIRTH", "GIRTS", "GISMO", "GISTS", "GITES",
-  "GIUST", "GIVED", "GIVEN", "GIVER", "GIVES", "GIZMO", "GLACE", "GLADS", "GLADY", "GLAIR",
-  "GLAMS", "GLAND", "GLANS", "GLARE", "GLARY", "GLASS", "GLAZE", "GLAZY", "GLEAM", "GLEAN",
-  "GLEBA", "GLEBE", "GLEBY", "GLEDE", "GLEDS", "GLEED", "GLEEK", "GLEES", "GLEET", "GLENS",
-  "GLEYS", "GIALS", "GLIDE", "GLIFF", "GLIME", "GLIMS", "GLINT", "GLISK", "GLITS", "GLOAM",
-  "GLOAT", "GLOBE", "GLOBS", "GLOBY", "GLOGG", "GLOMS", "GLOOM", "GLOOP", "GLOPS", "GLORY",
-  "GLOSS", "GLOST", "GLOUT", "GLOVE", "GLOWS", "GLOZE", "GLUED", "GLUER", "GLUES", "GLUEY",
-  "GLUGS", "GLUME", "GLUMS", "GLUON", "GLUTE", "GLUTS", "GLYPH", "GNARL", "GNARR", "GNARS",
-  "GNASH", "GNATS", "GNAWN", "GNAWS", "GNOME", "GOADS", "GOALS", "GOARY", "GOATS", "GOATY",
-  "GOBAN", "GOBOS", "GODET", "GODLY", "GOERS", "GOFER", "GOGOS", "GOING", "GOLDS", "GOLEM",
-  "GOLFS", "GOLLY", "GOMBO", "GOMER", "GONAD", "GONEF", "GONER", "GONGS", "GONIA", "GONIF",
-  "GONKS", "GONNA", "GONOF", "GOOBY", "GOODS", "GOODY", "GOOEY", "GOOFS", "GOOFY", "GOOKS",
-  "GOOKY", "GOONS", "GOONY", "GOOPS", "GOOPY", "GOOSE", "GOOSY", "GOPAK", "GORAL", "GORED",
-  "GORES", "GORGE", "GORPS", "GORSE", "GORSY", "GOTHS", "GOUGE", "GOURD", "GOUTS", "GOUTY",
-  "GOWAN", "GOWDS", "GOWKS", "GOWNS", "GOXES", "GOYIM", "GRAAL", "GRABS", "GRACE", "GRADE",
-  "GRADS", "GRAFT", "GRAIL", "GRAIN", "GRAMA", "GRAMP", "GRAMS", "GRANA", "GRAND", "GRANS",
-  "GRANT", "GRAPE", "GRAPH", "GRAPY", "GRASP", "GRASS", "GRATE", "GRAVE", "GRAVY", "GRAYS",
-  "GRAZE", "GREAT", "GREBE", "GRECE", "GREED", "GREEK", "GREEN", "GREES", "GREET", "GREGO",
-  "GREYS", "GRIDE", "GRIDS", "GRIEF", "GRIFF", "GRIFT", "GRIGS", "GRILL", "GRIME", "GRIMY",
-  "GRIND", "GRINS", "GRIOT", "GRIPE", "GRIPS", "GRIPT", "GRIPY", "GRIST", "GRITH", "GRITS",
-  "GROAN", "GROAT", "GRODY", "GROGS", "GROIN", "GROKS", "GROMA", "GRONE", "GROOF", "GROOM",
-  "GROPE", "GROSS", "GROSZ", "GROTS", "GROUP", "GROUT", "GROVE", "GROVY", "GROWL", "GROWN",
-  "GROWS", "GRUBB", "GRUBS", "GRUEL", "GRUES", "GRUFF", "GRUME", "GRUMP", "GRUNT", "GRYCE",
-  "GUANA", "GUANO", "GUANS", "GUARD", "GUARV", "GUAVA", "GUCKS", "GUCKY", "GUDES", "GUESS",
-  "GUEST", "GUFFS", "GUIDE", "GUIDS", "GUILD", "GUILE", "GUILT", "GUIRO", "GUISE", "GULAG",
-  "GULAR", "GULAS", "GULCH", "GULES", "GULFS", "GULFY", "GULLS", "GULLY", "GULPS", "GULPY",
-  "GUMBO", "GUMMA", "GUMMY", "GUMPS", "GUNDY", "GUNGE", "GUNGY", "GUNKS", "GUNKY", "GUNNY",
-  "GUPPY", "GURGE", "GURLS", "GURLY", "GURRY", "GURSH", "GURUS", "GUSHY", "GUSLA", "GUSLE",
-  "GUSLI", "GUSSY", "GUSTO", "GUSTS", "GUSTY", "GUTSY", "GUTTA", "GUTTY", "GUYED", "GUYOT",
-  "GWINE", "GYBED", "GYBES", "GYOZA", "GYPSY", "GYRAL", "GYRED", "GYRES", "GYRON", "GYROS",
-  "GYRUS", "GYVES"
-]);
-
-const WORD_LENGTH = 5;
-const MAX_GUESSES = 6;
-
-const App = () => {
-  // Game states: 'setup' (player 1 entering word), 'playing' (player 2 guessing), 'won', 'lost'
-  const [gameState, setGameState] = useState('setup');
-  const [secretWord, setSecretWord] = useState('');
-  const [setupInput, setSetupInput] = useState('');
-  const [setupError, setSetupError] = useState('');
-
-  // Playing state
-  const [guesses, setGuesses] = useState(Array(MAX_GUESSES).fill(''));
-  const [currentGuessIndex, setCurrentGuessIndex] = useState(0);
-  const [currentGuess, setCurrentGuess] = useState('');
-  const [gameMessage, setGameMessage] = useState('');
-
-  const handleSetupInput = (e) => {
-    const val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, WORD_LENGTH);
-    setSetupInput(val);
-    setSetupError('');
-  };
-
-  const startPlaying = () => {
-    if (setupInput.length !== WORD_LENGTH) {
-      setSetupError(`Word must be exactly ${WORD_LENGTH} letters long.`);
-      return;
-    }
-    if (!VALID_WORDS.has(setupInput)) {
-      setSetupError("Not a valid word in dictionary.");
-      return;
-    }
-    setSecretWord(setupInput);
-    setGameState('playing');
-    setGameMessage('');
-  };
-
-  const onKeyPress = useCallback((key) => {
-    if (gameState !== 'playing') return;
-
-    if (key === 'Enter') {
-      submitGuess();
-    } else if (key === 'Backspace' || key === 'Delete') {
-      setCurrentGuess((prev) => prev.slice(0, -1));
-    } else if (/^[A-Z]$/.test(key) && currentGuess.length < WORD_LENGTH) {
-      setCurrentGuess((prev) => prev + key);
-    }
-  }, [gameState, currentGuess, currentGuessIndex, secretWord]);
-
-  const submitGuess = () => {
-    if (currentGuess.length !== WORD_LENGTH) {
-      showMessage("Not enough letters");
-      return;
-    }
-    if (!VALID_WORDS.has(currentGuess)) {
-       showMessage("Not in word list");
-       return;
-    }
-
-    const newGuesses = [...guesses];
-    newGuesses[currentGuessIndex] = currentGuess;
-    setGuesses(newGuesses);
-
-    if (currentGuess === secretWord) {
-      setGameState('won');
-      showMessage("Splendid!");
-    } else if (currentGuessIndex === MAX_GUESSES - 1) {
-      setGameState('lost');
-      showMessage(secretWord);
-    } else {
-      setCurrentGuessIndex(currentGuessIndex + 1);
-      setCurrentGuess('');
-    }
-  };
-
-  const showMessage = (msg) => {
-    setGameMessage(msg);
-    if (msg !== "Splendid!" && msg !== secretWord) {
-        setTimeout(() => setGameMessage(''), 2000);
-    }
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-        if (gameState !== 'playing') return;
-        
-        if (e.key === 'Enter') {
-            onKeyPress('Enter');
-        } else if (e.key === 'Backspace') {
-            onKeyPress('Backspace');
-        } else {
-            const key = e.key.toUpperCase();
-            if (/^[A-Z]$/.test(key)) {
-                onKeyPress(key);
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Custom Wordle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #121213;
+            color: #ffffff;
+            font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+            touch-action: manipulation;
         }
-    };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onKeyPress, gameState]);
-
-  // Helper to determine letter colors for a submitted guess
-  const getLetterStatuses = (guess, target) => {
-    const statuses = Array(WORD_LENGTH).fill('absent');
-    const targetLetters = target.split('');
-    const guessLetters = guess.split('');
-
-    // First pass: find correct letters (green)
-    guessLetters.forEach((letter, i) => {
-      if (letter === targetLetters[i]) {
-        statuses[i] = 'correct';
-        targetLetters[i] = null; // Mark as used
-        guessLetters[i] = null; // Mark as processed
-      }
-    });
-
-    // Second pass: find present letters (yellow)
-    guessLetters.forEach((letter, i) => {
-      if (letter !== null && targetLetters.includes(letter)) {
-        statuses[i] = 'present';
-        targetLetters[targetLetters.indexOf(letter)] = null; // Mark as used
-      }
-    });
-
-    return statuses;
-  };
-
-  // Determine statuses for the virtual keyboard
-  const getKeyboardStatuses = () => {
-    const statuses = {};
-    guesses.forEach((guess) => {
-      if (!guess) return;
-      const letterStatuses = getLetterStatuses(guess, secretWord);
-      guess.split('').forEach((letter, i) => {
-        const currentStatus = statuses[letter];
-        const newStatus = letterStatuses[i];
-        
-        // Priority: correct > present > absent
-        if (newStatus === 'correct' || currentStatus === 'correct') {
-          statuses[letter] = 'correct';
-        } else if (newStatus === 'present' || currentStatus === 'present') {
-          statuses[letter] = 'present';
-        } else if (!currentStatus) {
-            statuses[letter] = 'absent';
+        .tile {
+            width: 100%;
+            height: 100%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            line-height: 2rem;
+            font-weight: bold;
+            vertical-align: middle;
+            box-sizing: border-box;
+            color: white;
+            text-transform: uppercase;
+            user-select: none;
+            transition: transform 0.15s ease, background-color 0.4s ease, border-color 0.4s ease;
         }
-      });
-    });
-    return statuses;
-  };
 
-  const resetGame = () => {
-    setGameState('setup');
-    setSecretWord('');
-    setSetupInput('');
-    setSetupError('');
-    setGuesses(Array(MAX_GUESSES).fill(''));
-    setCurrentGuessIndex(0);
-    setCurrentGuess('');
-    setGameMessage('');
-  };
+        /* Default empty tile */
+        .tile[data-state="empty"] {
+            border: 2px solid #3a3a3c;
+        }
 
-  const keyboardStatuses = getKeyboardStatuses();
+        /* Tile with a letter before submit */
+        .tile[data-state="tbd"] {
+            border: 2px solid #565758;
+            animation: popIn 0.1s ease-in-out;
+        }
 
-  if (gameState === 'setup') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white font-sans p-4">
-        <h1 className="text-4xl font-bold mb-8 tracking-widest uppercase">Custom Wordle</h1>
-        <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Player 1: Set the Word</h2>
-          <p className="text-gray-400 mb-6 text-center text-sm">
-            Enter a valid 5-letter word for Player 2 to guess.
-          </p>
-          
-          <input
-            type="text"
-            value={setupInput}
-            onChange={handleSetupInput}
-            placeholder="Type word here"
-            className="w-full bg-gray-700 text-white text-center text-2xl font-bold p-4 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-green-500 uppercase tracking-widest"
-            maxLength={WORD_LENGTH}
-            autoFocus
-          />
-          
-          {setupError && (
-            <p className="text-red-400 text-center mb-4 font-semibold animate-pulse">{setupError}</p>
-          )}
+        /* Evaluated tiles */
+        .tile[data-state="correct"] {
+            background-color: #538d4e;
+            border: 2px solid #538d4e;
+        }
 
-          <button
-            onClick={startPlaying}
-            disabled={setupInput.length !== WORD_LENGTH}
-            className={`w-full p-4 rounded font-bold text-lg transition-colors ${
-              setupInput.length === WORD_LENGTH 
-                ? 'bg-green-600 hover:bg-green-500 text-white cursor-pointer' 
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Start Game
-          </button>
+        .tile[data-state="present"] {
+            background-color: #b59f3b;
+            border: 2px solid #b59f3b;
+        }
+
+        .tile[data-state="absent"] {
+            background-color: #3a3a3c;
+            border: 2px solid #3a3a3c;
+        }
+
+        /* Flip animation for submitting */
+        .tile[data-animation="flip-in"] {
+            animation: flipIn 0.25s ease-in forwards;
+        }
+
+        .tile[data-animation="flip-out"] {
+            animation: flipOut 0.25s ease-in forwards;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            40% { transform: scale(1.1); opacity: 1; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes flipIn {
+            0% { transform: rotateX(0deg); }
+            100% { transform: rotateX(-90deg); }
+        }
+
+        @keyframes flipOut {
+            0% { transform: rotateX(-90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+        
+        .row.shake {
+            animation: shake 0.5s;
+        }
+
+        /* Keyboard styles */
+        .key {
+            font-family: inherit;
+            font-weight: bold;
+            border: 0;
+            padding: 0;
+            height: 58px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            background-color: #818384;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+            transition: background-color 0.1s ease;
+        }
+
+        .key:active {
+            background-color: #565758;
+        }
+
+        .key[data-state="correct"] { background-color: #538d4e; }
+        .key[data-state="present"] { background-color: #b59f3b; }
+        .key[data-state="absent"] { background-color: #3a3a3c; }
+
+        .key-wide { width: 65px; font-size: 12px;}
+        .key-normal { flex: 1; font-size: 1.25rem;}
+
+        /* Setup input styling */
+        #setup-input {
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+        }
+        
+        #toast-container {
+            pointer-events: none;
+        }
+
+        .toast-message {
+            background-color: white;
+            color: black;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+        
+        .toast-message.fade-out {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-between overflow-hidden">
+
+    <!-- SETUP VIEW -->
+    <div id="setup-view" class="w-full h-full flex flex-col items-center justify-center p-4 absolute top-0 left-0 bg-[#121213] z-50">
+        <h1 class="text-4xl font-extrabold mb-2 tracking-wider text-center">CUSTOM<br>WORDLE</h1>
+        <p class="text-gray-400 mb-8 text-center text-sm max-w-xs">Player 1: Set a 5-letter word for Player 2 to guess.</p>
+        
+        <div class="w-full max-w-sm flex flex-col gap-4">
+            <input type="text" id="setup-input" maxlength="5" autocomplete="off" spellcheck="false"
+                class="w-full bg-[#121213] border-2 border-[#565758] rounded-md py-4 text-center text-3xl font-bold focus:outline-none focus:border-white transition-colors"
+                placeholder="-----">
+            
+            <p id="setup-error" class="text-red-400 text-center h-6 font-semibold opacity-0 transition-opacity"></p>
+            
+            <button id="start-btn" 
+                class="w-full py-4 bg-[#818384] text-white font-bold rounded-md cursor-not-allowed opacity-50 transition-all text-xl" disabled>
+                START GAME
+            </button>
         </div>
-      </div>
-    );
-  }
-
-  const rows = guesses.map((guess, i) => {
-    const isCurrentRow = i === currentGuessIndex;
-    const isSubmitted = i < currentGuessIndex;
-    let content = guess;
-    let statuses = Array(WORD_LENGTH).fill('');
-
-    if (isCurrentRow) {
-      content = currentGuess.padEnd(WORD_LENGTH, ' ');
-    } else if (!isSubmitted) {
-      content = '     ';
-    } else {
-      statuses = getLetterStatuses(guess, secretWord);
-    }
-
-    return (
-      <div key={i} className="flex gap-2 mb-2 justify-center">
-        {content.split('').map((letter, j) => {
-          let bgColor = 'bg-transparent border-gray-600'; // empty
-          let textColor = 'text-white';
-          let borderColor = 'border-gray-600';
-
-          if (letter !== ' ' && !isSubmitted) {
-             borderColor = 'border-gray-400';
-          }
-
-          if (isSubmitted) {
-            borderColor = 'border-transparent';
-            if (statuses[j] === 'correct') {
-              bgColor = 'bg-green-600';
-            } else if (statuses[j] === 'present') {
-              bgColor = 'bg-yellow-500';
-            } else {
-              bgColor = 'bg-gray-700';
-            }
-          }
-
-          return (
-            <div
-              key={j}
-              className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center text-3xl font-bold uppercase border-2 ${bgColor} ${borderColor} ${textColor} transition-colors duration-500`}
-            >
-              {letter}
-            </div>
-          );
-        })}
-      </div>
-    );
-  });
-
-  const keyboardRows = [
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace']
-  ];
-
-  return (
-    <div className="flex flex-col items-center justify-between min-h-screen bg-gray-900 text-white font-sans py-4 sm:py-8">
-      
-      <header className="w-full max-w-lg border-b border-gray-700 pb-4 mb-4 flex justify-between items-center px-4 relative">
-         <div className="w-8"></div> {/* Spacer for centering */}
-         <h1 className="text-3xl font-bold tracking-widest uppercase text-center flex-grow">Wordle</h1>
-         <button onClick={resetGame} className="text-gray-400 hover:text-white transition-colors" title="Restart Game">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-         </button>
-      </header>
-
-      {/* Message Toast */}
-      <div className="relative h-12 w-full flex justify-center items-center">
-        {gameMessage && (
-            <div className="absolute top-0 bg-white text-black font-semibold px-4 py-3 rounded shadow-lg z-10 animate-bounce">
-            {gameMessage}
-            </div>
-        )}
-      </div>
-
-      <div className="flex-grow flex flex-col justify-center mb-6">
-        {rows}
-      </div>
-
-      <div className="w-full max-w-lg px-2">
-        {keyboardRows.map((row, i) => (
-          <div key={i} className="flex justify-center gap-1 sm:gap-2 mb-2">
-            {row.map((key) => {
-              let bg = 'bg-gray-500';
-              const status = keyboardStatuses[key];
-              
-              if (status === 'correct') bg = 'bg-green-600';
-              else if (status === 'present') bg = 'bg-yellow-500';
-              else if (status === 'absent') bg = 'bg-gray-800';
-              
-              const isSpecialKey = key === 'Enter' || key === 'Backspace';
-              
-              return (
-                <button
-                  key={key}
-                  onClick={() => onKeyPress(key)}
-                  className={`
-                    ${bg} hover:opacity-80
-                    text-white font-bold rounded
-                    ${isSpecialKey ? 'px-2 sm:px-4 text-xs sm:text-sm' : 'w-8 h-12 sm:w-11 sm:h-14 text-sm sm:text-lg'}
-                    flex items-center justify-center transition-colors uppercase select-none
-                  `}
-                >
-                  {key === 'Backspace' ? (
-                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
-                     </svg>
-                  ) : key}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-      
-      {(gameState === 'won' || gameState === 'lost') && (
-          <div className="mt-8">
-              <button 
-                onClick={resetGame}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105"
-              >
-                  Play Again
-              </button>
-          </div>
-      )}
-
     </div>
-  );
-};
 
-export default App;
+    <!-- GAME HEADER -->
+    <header class="flex w-full max-w-lg items-center justify-between px-4 py-3 border-b border-[#3a3a3c]">
+        <div class="w-8"></div>
+        <h1 class="font-extrabold text-3xl tracking-wider">WORDLE</h1>
+        <button id="reset-btn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors" title="New Game">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+        </button>
+    </header>
+
+    <!-- GAME BOARD -->
+    <main class="flex-grow flex items-center justify-center w-full overflow-hidden">
+        <div id="board" class="grid grid-rows-6 gap-[5px] p-[10px] w-full max-w-[350px] aspect-[5/6]">
+            <!-- Rows injected by JS -->
+        </div>
+    </main>
+
+    <!-- KEYBOARD -->
+    <div id="keyboard" class="w-full max-w-[500px] px-2 pb-8 pt-2 flex flex-col gap-2">
+        <div class="flex gap-1.5 justify-center w-full">
+            <button class="key key-normal" data-key="q">Q</button>
+            <button class="key key-normal" data-key="w">W</button>
+            <button class="key key-normal" data-key="e">E</button>
+            <button class="key key-normal" data-key="r">R</button>
+            <button class="key key-normal" data-key="t">T</button>
+            <button class="key key-normal" data-key="y">Y</button>
+            <button class="key key-normal" data-key="u">U</button>
+            <button class="key key-normal" data-key="i">I</button>
+            <button class="key key-normal" data-key="o">O</button>
+            <button class="key key-normal" data-key="p">P</button>
+        </div>
+        <div class="flex gap-1.5 justify-center w-full px-[5%]">
+            <button class="key key-normal" data-key="a">A</button>
+            <button class="key key-normal" data-key="s">S</button>
+            <button class="key key-normal" data-key="d">D</button>
+            <button class="key key-normal" data-key="f">F</button>
+            <button class="key key-normal" data-key="g">G</button>
+            <button class="key key-normal" data-key="h">H</button>
+            <button class="key key-normal" data-key="j">J</button>
+            <button class="key key-normal" data-key="k">K</button>
+            <button class="key key-normal" data-key="l">L</button>
+        </div>
+        <div class="flex gap-1.5 justify-center w-full">
+            <button class="key key-wide" data-key="enter">ENTER</button>
+            <button class="key key-normal" data-key="z">Z</button>
+            <button class="key key-normal" data-key="x">X</button>
+            <button class="key key-normal" data-key="c">C</button>
+            <button class="key key-normal" data-key="v">V</button>
+            <button class="key key-normal" data-key="b">B</button>
+            <button class="key key-normal" data-key="n">N</button>
+            <button class="key key-normal" data-key="m">M</button>
+            <button class="key key-wide" data-key="backspace">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path fill="var(--color-tone-1)" d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container" class="absolute top-20 left-0 w-full flex flex-col items-center z-50"></div>
+
+    <script>
+        // Minimal valid word list for checking (expanded slightly for better playability)
+        const VALID_WORDS = new Set([
+            "CIGAR", "REBUT", "SISSY", "HUMPH", "AWAKE", "BLUSH", "FOCAL", "EVADE", "NAVAL", "SERVE",
+            "HEATH", "DWARF", "MODEL", "KARMA", "STINK", "GRADE", "QUIET", "BENCH", "ABATE", "FEIGN",
+            "MAJOR", "DEATH", "FRESH", "CRUST", "STOOL", "COLON", "ABASE", "MARRY", "REACT", "BATTY",
+            "PRIDE", "FLOSS", "HELIX", "CROAK", "STAFF", "PAPER", "UNFED", "WHELP", "TRAWL", "OUTDO",
+            "APPLE", "TRAIN", "HOUSE", "MOUSE", "SMILE", "PLANT", "WATER", "LIGHT", "RIGHT", "NIGHT",
+            "MIGHT", "FIGHT", "SIGHT", "TIGHT", "GHOST", "TOAST", "ROAST", "COAST", "BOAST", "BEAST",
+            "FEAST", "LEAST", "YEAST", "GUEST", "QUEST", "CHEST", "CREST", "BLAST", "TRUST", "RUSTY", 
+            "DUSTY", "MUSTY", "GUSTY", "LUSTY", "FAST", "PAST", "LAST", "MAST", "CAST", "VAST", 
+            "WEST", "NEST", "PEST", "REST", "TEST", "BEST", "ZEST", "POST", "HOST", "LOST", "COST", 
+            "FROST", "WORDS", "WORDY", "WORLD", "HELLO", "SWEET", "HEART", "SMART", "BRAIN", "THINK", 
+            "DRINK", "BLINK", "BRING", "THING", "SWING", "STING", "FLING", "SLING", "CLING", "WRING", 
+            "SPRING", "STRING", "STRONG", "WRONG", "ALONG", "SONG", "GONG", "LONG", "PONG", "TONG",
+            "GAMES", "GAMER", "GAMED", "GAMIN", "GAMIC", "GAMAY", "GAMBA", "GAMMA", "GAMUT", "GANGS", 
+            "GASES", "GASPS", "GATED", "GATES", "GATOR", "GAUGE", "GAUNT", "GAUZE", "GAVEL", "GAWKS",
+            "GEARS", "GECKO", "GEEKS", "GEESE", "GENES", "GENIE", "GENUS", "GEODE", "GHOST", "GHOUL",
+            "GIANT", "GIDDY", "GIFTS", "GILLS", "GIRLS", "GIVEN", "GIVES", "GIZMO", "GLADE", "GLAND",
+            "GLARE", "GLASS", "GLAZE", "GLEAM", "GLEAN", "GLIDE", "GLOAT", "GLOBE", "GLOOM", "GLORY",
+            "GLOSS", "GLOVE", "GLOWS", "GLUED", "GLUES", "GNASH", "GNATS", "GNOME", "GOALS", "GOATS",
+            "GOING", "GOLDS", "GOLEM", "GOLFS", "GONER", "GONGS", "GOODS", "GOODY", "GOOEY", "GOOFS",
+            "GOOSE", "GORGE", "GOTHS", "GOUGE", "GOURD", "GOWNS", "GRABS", "GRACE", "GRADE", "GRADS",
+            "GRAFT", "GRAIL", "GRAIN", "GRAND", "GRANT", "GRAPE", "GRAPH", "GRASP", "GRASS", "GRATE",
+            "GRAVE", "GRAVY", "GRAYS", "GRAZE", "GREAT", "GREED", "GREEK", "GREEN", "GREET", "GREYS",
+            "GRIEF", "GRILL", "GRIME", "GRIMY", "GRIND", "GRINS", "GRIPE", "GRIPS", "GRIST", "GROAN",
+            "GROIN", "GROOM", "GROPE", "GROSS", "GROUP", "GROUT", "GROVE", "GROWL", "GROWN", "GROWS",
+            "GRUBS", "GRUEL", "GRUFF", "GRUMP", "GRUNT", "GUANO", "GUARD", "GUAVA", "GUESS", "GUEST",
+            "GUIDE", "GUILD", "GUILE", "GUILT", "GUISE", "GULCH", "GULFS", "GULLS", "GULLY", "GULPS",
+            "GUMBO", "GUMMY", "GUPPY", "GURUS", "GUSHY", "GUSTO", "GUSTS", "GUTSY", "GYPSY"
+        ]);
+
+        const WORD_LENGTH = 5;
+        const MAX_GUESSES = 6;
+        
+        let gameState = 'setup'; // 'setup', 'playing', 'won', 'lost'
+        let secretWord = '';
+        let guesses = Array(MAX_GUESSES).fill('');
+        let currentRowIndex = 0;
+        let currentGuess = '';
+
+        // DOM Elements
+        const setupView = document.getElementById('setup-view');
+        const setupInput = document.getElementById('setup-input');
+        const setupError = document.getElementById('setup-error');
+        const startBtn = document.getElementById('start-btn');
+        const board = document.getElementById('board');
+        const keyboard = document.getElementById('keyboard');
+        const resetBtn = document.getElementById('reset-btn');
+        const toastContainer = document.getElementById('toast-container');
+
+        // --- Setup Phase Logic ---
+        
+        setupInput.addEventListener('input', (e) => {
+            // Force uppercase and remove non-letters
+            let val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+            e.target.value = val;
+            
+            if (val.length === WORD_LENGTH) {
+                if (VALID_WORDS.has(val)) {
+                    setupError.style.opacity = '0';
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'bg-[#818384]', 'cursor-not-allowed');
+                    startBtn.classList.add('bg-[#538d4e]', 'hover:bg-[#43723f]', 'cursor-pointer');
+                } else {
+                    setupError.textContent = "Not in word list";
+                    setupError.style.opacity = '1';
+                    startBtn.disabled = true;
+                    resetStartButton();
+                }
+            } else {
+                setupError.style.opacity = '0';
+                startBtn.disabled = true;
+                resetStartButton();
+            }
+        });
+
+        setupInput.addEventListener('keydown', (e) => {
+             if (e.key === 'Enter' && !startBtn.disabled) {
+                 startGame();
+             }
+        });
+
+        function resetStartButton() {
+            startBtn.classList.add('opacity-50', 'bg-[#818384]', 'cursor-not-allowed');
+            startBtn.classList.remove('bg-[#538d4e]', 'hover:bg-[#43723f]', 'cursor-pointer');
+        }
+
+        startBtn.addEventListener('click', startGame);
+
+        function startGame() {
+            secretWord = setupInput.value.toUpperCase();
+            setupView.classList.add('hidden');
+            gameState = 'playing';
+            initializeBoard();
+            document.activeElement.blur(); // Remove focus from input to avoid accidental typing
+            showToast("Player 2: Start Guessing!", 2500);
+        }
+
+        // --- Game Board Logic ---
+        
+        function initializeBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < MAX_GUESSES; i++) {
+                const row = document.createElement('div');
+                row.className = 'row grid grid-cols-5 gap-[5px] w-full h-full';
+                row.id = `row-${i}`;
+                
+                for (let j = 0; j < WORD_LENGTH; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.id = `tile-${i}-${j}`;
+                    tile.dataset.state = 'empty';
+                    row.appendChild(tile);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        // --- Input Handling ---
+
+        function handleInput(key) {
+            if (gameState !== 'playing') return;
+
+            if (key === 'ENTER') {
+                submitGuess();
+            } else if (key === 'BACKSPACE') {
+                deleteLetter();
+            } else if (/^[A-Z]$/.test(key)) {
+                addLetter(key);
+            }
+        }
+
+        function addLetter(letter) {
+            if (currentGuess.length < WORD_LENGTH) {
+                currentGuess += letter;
+                updateGrid();
+            }
+        }
+
+        function deleteLetter() {
+            if (currentGuess.length > 0) {
+                currentGuess = currentGuess.slice(0, -1);
+                updateGrid();
+            }
+        }
+
+        function updateGrid() {
+            const row = document.getElementById(`row-${currentRowIndex}`);
+            const tiles = row.querySelectorAll('.tile');
+            
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = tiles[i];
+                if (i < currentGuess.length) {
+                    tile.textContent = currentGuess[i];
+                    tile.dataset.state = 'tbd';
+                } else {
+                    tile.textContent = '';
+                    tile.dataset.state = 'empty';
+                    // Remove animation class if letter is deleted
+                    tile.style.animation = 'none'; 
+                    tile.offsetHeight; /* trigger reflow */
+                    tile.style.animation = null; 
+                }
+            }
+        }
+
+        function submitGuess() {
+            if (currentGuess.length !== WORD_LENGTH) {
+                showToast("Not enough letters");
+                shakeRow();
+                return;
+            }
+
+            if (!VALID_WORDS.has(currentGuess)) {
+                showToast("Not in word list");
+                shakeRow();
+                return;
+            }
+
+            const row = document.getElementById(`row-${currentRowIndex}`);
+            const tiles = row.querySelectorAll('.tile');
+            const guessArray = currentGuess.split('');
+            const targetArray = secretWord.split('');
+            const statuses = Array(WORD_LENGTH).fill('absent');
+
+            // Evaluate guess (Pass 1: Correct)
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                if (guessArray[i] === targetArray[i]) {
+                    statuses[i] = 'correct';
+                    targetArray[i] = null;
+                    guessArray[i] = null;
+                }
+            }
+
+            // Evaluate guess (Pass 2: Present)
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                if (guessArray[i] !== null && targetArray.includes(guessArray[i])) {
+                    statuses[i] = 'present';
+                    targetArray[targetArray.indexOf(guessArray[i])] = null;
+                }
+            }
+
+            gameState = 'animating'; // Lock input during animation
+            
+            // Animate tiles
+            tiles.forEach((tile, index) => {
+                setTimeout(() => {
+                    tile.dataset.animation = 'flip-in';
+                    
+                    tile.addEventListener('animationend', () => {
+                        if(tile.dataset.animation === 'flip-in') {
+                             // Middle of flip: update colors
+                             tile.dataset.state = statuses[index];
+                             tile.dataset.animation = 'flip-out';
+                             updateKeyboard(currentGuess[index], statuses[index]);
+                        } else if (tile.dataset.animation === 'flip-out') {
+                             tile.removeAttribute('data-animation');
+                             
+                             // If it's the last tile finishing animation
+                             if (index === WORD_LENGTH - 1) {
+                                 finalizeGuess(currentGuess === secretWord);
+                             }
+                        }
+                    }, {once: false}); // Note: event listener logic handles the dual states
+                    
+                }, index * 250); // Stagger animation
+            });
+        }
+
+        function finalizeGuess(isWin) {
+            guesses[currentRowIndex] = currentGuess;
+            
+            if (isWin) {
+                gameState = 'won';
+                setTimeout(() => showToast(getWinMessage(currentRowIndex), 5000), 500);
+            } else if (currentRowIndex === MAX_GUESSES - 1) {
+                gameState = 'lost';
+                setTimeout(() => showToast(secretWord, 10000), 500);
+            } else {
+                currentRowIndex++;
+                currentGuess = '';
+                gameState = 'playing';
+            }
+        }
+
+        function updateKeyboard(letter, status) {
+            const keyBtn = document.querySelector(`.key[data-key="${letter.toLowerCase()}"]`);
+            if (!keyBtn) return;
+
+            const currentStatus = keyBtn.dataset.state;
+            
+            if (status === 'correct' || currentStatus === 'correct') {
+                keyBtn.dataset.state = 'correct';
+            } else if (status === 'present' && currentStatus !== 'correct') {
+                keyBtn.dataset.state = 'present';
+            } else if (status === 'absent' && !currentStatus) {
+                keyBtn.dataset.state = 'absent';
+            }
+        }
+
+        function shakeRow() {
+            const row = document.getElementById(`row-${currentRowIndex}`);
+            row.classList.remove('shake');
+            void row.offsetWidth; // trigger reflow
+            row.classList.add('shake');
+            setTimeout(() => row.classList.remove('shake'), 500);
+        }
+
+        // --- Helpers ---
+
+        function showToast(message, duration = 2000) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.className = 'toast-message';
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300); // Matches CSS transition duration
+            }, duration);
+        }
+        
+        function getWinMessage(attempts) {
+            const messages = ["Genius", "Magnificent", "Impressive", "Splendid", "Great", "Phew"];
+            return messages[attempts] || "You got it!";
+        }
+
+        // Reset Game
+        resetBtn.addEventListener('click', () => {
+            // Reset State
+            gameState = 'setup';
+            secretWord = '';
+            guesses = Array(MAX_GUESSES).fill('');
+            currentRowIndex = 0;
+            currentGuess = '';
+            
+            // Reset UI
+            setupInput.value = '';
+            setupError.style.opacity = '0';
+            startBtn.disabled = true;
+            resetStartButton();
+            setupView.classList.remove('hidden');
+            
+            board.innerHTML = '';
+            
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(key => key.removeAttribute('data-state'));
+            
+            toastContainer.innerHTML = '';
+        });
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            if (gameState === 'setup' || gameState === 'animating') return;
+            
+            if (e.key === 'Enter') handleInput('ENTER');
+            else if (e.key === 'Backspace') handleInput('BACKSPACE');
+            else if (e.key.match(/^[a-zA-Z]$/)) handleInput(e.key.toUpperCase());
+        });
+
+        keyboard.addEventListener('click', (e) => {
+            if (gameState === 'setup' || gameState === 'animating') return;
+            
+            const keyBtn = e.target.closest('.key');
+            if (keyBtn) {
+                const key = keyBtn.dataset.key.toUpperCase();
+                handleInput(key);
+                
+                // Remove focus to prevent Enter key triggering the last clicked button
+                keyBtn.blur();
+            }
+        });
+
+    </script>
+</body>
+</html>
