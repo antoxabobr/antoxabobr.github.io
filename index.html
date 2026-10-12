@@ -1,695 +1,408 @@
-<!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конспекты по Физике</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        physics: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                            950: '#042f2e',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(8px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+// A minimal dictionary for demonstration purposes.
+// In a real application, you might want to fetch a larger JSON file or use an API.
+const VALID_WORDS = new Set([
+  "CIGAR", "REBUT", "SISSY", "HUMPH", "AWAKE", "BLUSH", "FOCAL", "EVADE", "NAVAL", "SERVE",
+  "HEATH", "DWARF", "MODEL", "KARMA", "STINK", "GRADE", "QUIET", "BENCH", "ABATE", "FEIGN",
+  "MAJOR", "DEATH", "FRESH", "CRUST", "STOOL", "COLON", "ABASE", "MARRY", "REACT", "BATTY",
+  "PRIDE", "FLOSS", "HELIX", "CROAK", "STAFF", "PAPER", "UNFED", "WHELP", "TRAWL", "OUTDO",
+  "APPLE", "TRAIN", "HOUSE", "MOUSE", "SMILE", "PLANT", "WATER", "LIGHT", "RIGHT", "NIGHT",
+  "MIGHT", "FIGHT", "SIGHT", "TIGHT", "GHOST", "TOAST", "ROAST", "COAST", "BOAST", "BEAST",
+  "FEAST", "LEAST", "YEAST", "GUEST", "QUEST", "CHEST", "CREST", "BLAST", "TRUST", "CRUST",
+  "RUSTY", "DUSTY", "MUSTY", "GUSTY", "LUSTY", "BUST", "JUST", "MUST", "GUST", "DUST",
+  "LUST", "RUST", "FAST", "PAST", "LAST", "MAST", "CAST", "VAST", "WEST", "NEST",
+  "PEST", "REST", "TEST", "BEST", "ZEST", "POST", "HOST", "LOST", "COST", "FROST",
+  "GHOST", "WORDS", "WORDY", "WORLD", "HELLO", "WORLD", "SWEET", "HEART", "SMART", "BRAIN",
+  "THINK", "DRINK", "BLINK", "STINK", "BRING", "THING", "SWING", "STING", "FLING", "SLING",
+  "CLING", "WRING", "SPRING", "STRING", "STRONG", "WRONG", "ALONG", "SONG", "GONG", "LONG",
+  "PONG", "TONG", "MONG", "HONG", "KONG", "DONG", "BONG", "ZONG", "VONG", "YONG",
+  "XONG", "QONG", "WONG", "RONG", "MONG", "NONG", "JONG", "FONG", "GONG", "CHONG",
+  "SHONG", "THONG", "PHONG", "WHONG", "KHONG", "ZHONG", "JHONG", "GHONG", "VHONG", "YHONG",
+  "XHONG", "QHONG", "EHONG", "IHONG", "OHONG", "UHONG", "AHONG", "ZHONG", "CHONG", "SHONG",
+  "THONG", "PHONG", "WHONG", "KHONG", "ZHONG", "JHONG", "GHONG", "VHONG", "YHONG", "XHONG",
+  "QHONG", "EHONG", "IHONG", "OHONG", "UHONG", "AHONG", "GAMES", "GAMER", "GAMED", "GAMIN",
+  "GAMIC", "GAMAY", "GAMBA", "GAMBE", "GAMBO", "GAMBS", "GAMER", "GAMES", "GAMEY", "GAMIC",
+  "GAMIN", "GAMMA", "GAMME", "GAMMY", "GAMPS", "GAMUT", "GANAS", "GANCH", "GANDA", "GANEF",
+  "GANEV", "GANGS", "GANJA", "GANKS", "GANOF", "GANTS", "GARBA", "GARBE", "GARBO", "GARBS",
+  "GARDA", "GARNI", "GARRE", "GARTH", "GARUM", "GASES", "GASPS", "GASPY", "GASTS", "GATCH",
+  "GATED", "GATER", "GATES", "GATHS", "GATOR", "GAUDS", "GAUDY", "GAUGE", "GAULS", "GAUNT",
+  "GAURS", "GAUSS", "GAUZE", "GAUZY", "GAVEL", "GAVOT", "GAWKS", "GAWKY", "GAWPS", "GAWSY",
+  "GAYAL", "GAYER", "GAYLY", "GAZAL", "GAZAR", "GAZED", "GAZER", "GAZES", "GAZON", "GAZOO",
+  "GEARS", "GECKO", "GECKS", "GEEKS", "GEEKY", "GEEPS", "GEESE", "GEEST", "GEIST", "GELDS",
+  "GELEE", "GELID", "GELLY", "GELTS", "GEMMA", "GEMMY", "GEMOT", "GENAL", "GENAS", "GENES",
+  "GENET", "GENIC", "GENIE", "GENII", "GENIP", "GENOA", "GENOM", "GENOS", "GENRO", "GENTS",
+  "GENUA", "GENUS", "GEODE", "GEOID", "GERAH", "GERBS", "GERMI", "GERMS", "GERMY", "GESSE",
+  "GESSO", "GESTE", "GESTS", "GETAS", "GETUP", "GEUMS", "GHATS", "GHAUT", "GHAZI", "GHEES",
+  "GHOST", "GHOUL", "GIANT", "GIBED", "GIBER", "GIBES", "GIDDY", "GIFTS", "GIGAS", "GIGHE",
+  "GIGOT", "GIGUE", "GILDS", "GILLS", "GILLY", "GILTS", "GIMEL", "GIMME", "GIMPS", "GIMPY",
+  "GINCH", "GINGE", "GINGS", "GINKS", "GINNY", "GINZO", "GIPON", "GIPSY", "GIRDS", "GIRLS",
+  "GIRLY", "GIRNS", "GIRON", "GIROS", "GIRSH", "GIRTH", "GIRTS", "GISMO", "GISTS", "GITES",
+  "GIUST", "GIVED", "GIVEN", "GIVER", "GIVES", "GIZMO", "GLACE", "GLADS", "GLADY", "GLAIR",
+  "GLAMS", "GLAND", "GLANS", "GLARE", "GLARY", "GLASS", "GLAZE", "GLAZY", "GLEAM", "GLEAN",
+  "GLEBA", "GLEBE", "GLEBY", "GLEDE", "GLEDS", "GLEED", "GLEEK", "GLEES", "GLEET", "GLENS",
+  "GLEYS", "GIALS", "GLIDE", "GLIFF", "GLIME", "GLIMS", "GLINT", "GLISK", "GLITS", "GLOAM",
+  "GLOAT", "GLOBE", "GLOBS", "GLOBY", "GLOGG", "GLOMS", "GLOOM", "GLOOP", "GLOPS", "GLORY",
+  "GLOSS", "GLOST", "GLOUT", "GLOVE", "GLOWS", "GLOZE", "GLUED", "GLUER", "GLUES", "GLUEY",
+  "GLUGS", "GLUME", "GLUMS", "GLUON", "GLUTE", "GLUTS", "GLYPH", "GNARL", "GNARR", "GNARS",
+  "GNASH", "GNATS", "GNAWN", "GNAWS", "GNOME", "GOADS", "GOALS", "GOARY", "GOATS", "GOATY",
+  "GOBAN", "GOBOS", "GODET", "GODLY", "GOERS", "GOFER", "GOGOS", "GOING", "GOLDS", "GOLEM",
+  "GOLFS", "GOLLY", "GOMBO", "GOMER", "GONAD", "GONEF", "GONER", "GONGS", "GONIA", "GONIF",
+  "GONKS", "GONNA", "GONOF", "GOOBY", "GOODS", "GOODY", "GOOEY", "GOOFS", "GOOFY", "GOOKS",
+  "GOOKY", "GOONS", "GOONY", "GOOPS", "GOOPY", "GOOSE", "GOOSY", "GOPAK", "GORAL", "GORED",
+  "GORES", "GORGE", "GORPS", "GORSE", "GORSY", "GOTHS", "GOUGE", "GOURD", "GOUTS", "GOUTY",
+  "GOWAN", "GOWDS", "GOWKS", "GOWNS", "GOXES", "GOYIM", "GRAAL", "GRABS", "GRACE", "GRADE",
+  "GRADS", "GRAFT", "GRAIL", "GRAIN", "GRAMA", "GRAMP", "GRAMS", "GRANA", "GRAND", "GRANS",
+  "GRANT", "GRAPE", "GRAPH", "GRAPY", "GRASP", "GRASS", "GRATE", "GRAVE", "GRAVY", "GRAYS",
+  "GRAZE", "GREAT", "GREBE", "GRECE", "GREED", "GREEK", "GREEN", "GREES", "GREET", "GREGO",
+  "GREYS", "GRIDE", "GRIDS", "GRIEF", "GRIFF", "GRIFT", "GRIGS", "GRILL", "GRIME", "GRIMY",
+  "GRIND", "GRINS", "GRIOT", "GRIPE", "GRIPS", "GRIPT", "GRIPY", "GRIST", "GRITH", "GRITS",
+  "GROAN", "GROAT", "GRODY", "GROGS", "GROIN", "GROKS", "GROMA", "GRONE", "GROOF", "GROOM",
+  "GROPE", "GROSS", "GROSZ", "GROTS", "GROUP", "GROUT", "GROVE", "GROVY", "GROWL", "GROWN",
+  "GROWS", "GRUBB", "GRUBS", "GRUEL", "GRUES", "GRUFF", "GRUME", "GRUMP", "GRUNT", "GRYCE",
+  "GUANA", "GUANO", "GUANS", "GUARD", "GUARV", "GUAVA", "GUCKS", "GUCKY", "GUDES", "GUESS",
+  "GUEST", "GUFFS", "GUIDE", "GUIDS", "GUILD", "GUILE", "GUILT", "GUIRO", "GUISE", "GULAG",
+  "GULAR", "GULAS", "GULCH", "GULES", "GULFS", "GULFY", "GULLS", "GULLY", "GULPS", "GULPY",
+  "GUMBO", "GUMMA", "GUMMY", "GUMPS", "GUNDY", "GUNGE", "GUNGY", "GUNKS", "GUNKY", "GUNNY",
+  "GUPPY", "GURGE", "GURLS", "GURLY", "GURRY", "GURSH", "GURUS", "GUSHY", "GUSLA", "GUSLE",
+  "GUSLI", "GUSSY", "GUSTO", "GUSTS", "GUSTY", "GUTSY", "GUTTA", "GUTTY", "GUYED", "GUYOT",
+  "GWINE", "GYBED", "GYBES", "GYOZA", "GYPSY", "GYRAL", "GYRED", "GYRES", "GYRON", "GYROS",
+  "GYRUS", "GYVES"
+]);
+
+const WORD_LENGTH = 5;
+const MAX_GUESSES = 6;
+
+const App = () => {
+  // Game states: 'setup' (player 1 entering word), 'playing' (player 2 guessing), 'won', 'lost'
+  const [gameState, setGameState] = useState('setup');
+  const [secretWord, setSecretWord] = useState('');
+  const [setupInput, setSetupInput] = useState('');
+  const [setupError, setSetupError] = useState('');
+
+  // Playing state
+  const [guesses, setGuesses] = useState(Array(MAX_GUESSES).fill(''));
+  const [currentGuessIndex, setCurrentGuessIndex] = useState(0);
+  const [currentGuess, setCurrentGuess] = useState('');
+  const [gameMessage, setGameMessage] = useState('');
+
+  const handleSetupInput = (e) => {
+    const val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, WORD_LENGTH);
+    setSetupInput(val);
+    setSetupError('');
+  };
+
+  const startPlaying = () => {
+    if (setupInput.length !== WORD_LENGTH) {
+      setSetupError(`Word must be exactly ${WORD_LENGTH} letters long.`);
+      return;
+    }
+    if (!VALID_WORDS.has(setupInput)) {
+      setSetupError("Not a valid word in dictionary.");
+      return;
+    }
+    setSecretWord(setupInput);
+    setGameState('playing');
+    setGameMessage('');
+  };
+
+  const onKeyPress = useCallback((key) => {
+    if (gameState !== 'playing') return;
+
+    if (key === 'Enter') {
+      submitGuess();
+    } else if (key === 'Backspace' || key === 'Delete') {
+      setCurrentGuess((prev) => prev.slice(0, -1));
+    } else if (/^[A-Z]$/.test(key) && currentGuess.length < WORD_LENGTH) {
+      setCurrentGuess((prev) => prev + key);
+    }
+  }, [gameState, currentGuess, currentGuessIndex, secretWord]);
+
+  const submitGuess = () => {
+    if (currentGuess.length !== WORD_LENGTH) {
+      showMessage("Not enough letters");
+      return;
+    }
+    if (!VALID_WORDS.has(currentGuess)) {
+       showMessage("Not in word list");
+       return;
+    }
+
+    const newGuesses = [...guesses];
+    newGuesses[currentGuessIndex] = currentGuess;
+    setGuesses(newGuesses);
+
+    if (currentGuess === secretWord) {
+      setGameState('won');
+      showMessage("Splendid!");
+    } else if (currentGuessIndex === MAX_GUESSES - 1) {
+      setGameState('lost');
+      showMessage(secretWord);
+    } else {
+      setCurrentGuessIndex(currentGuessIndex + 1);
+      setCurrentGuess('');
+    }
+  };
+
+  const showMessage = (msg) => {
+    setGameMessage(msg);
+    if (msg !== "Splendid!" && msg !== secretWord) {
+        setTimeout(() => setGameMessage(''), 2000);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+        if (gameState !== 'playing') return;
+        
+        if (e.key === 'Enter') {
+            onKeyPress('Enter');
+        } else if (e.key === 'Backspace') {
+            onKeyPress('Backspace');
+        } else {
+            const key = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(key)) {
+                onKeyPress(key);
             }
         }
-    </script>
+    };
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onKeyPress, gameState]);
 
-    <!-- KaTeX for robust fast formula rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  // Helper to determine letter colors for a submitted guess
+  const getLetterStatuses = (guess, target) => {
+    const statuses = Array(WORD_LENGTH).fill('absent');
+    const targetLetters = target.split('');
+    const guessLetters = guess.split('');
 
-    <style>
-        body { font-family: 'Inter', sans-serif; }
+    // First pass: find correct letters (green)
+    guessLetters.forEach((letter, i) => {
+      if (letter === targetLetters[i]) {
+        statuses[i] = 'correct';
+        targetLetters[i] = null; // Mark as used
+        guessLetters[i] = null; // Mark as processed
+      }
+    });
+
+    // Second pass: find present letters (yellow)
+    guessLetters.forEach((letter, i) => {
+      if (letter !== null && targetLetters.includes(letter)) {
+        statuses[i] = 'present';
+        targetLetters[targetLetters.indexOf(letter)] = null; // Mark as used
+      }
+    });
+
+    return statuses;
+  };
+
+  // Determine statuses for the virtual keyboard
+  const getKeyboardStatuses = () => {
+    const statuses = {};
+    guesses.forEach((guess) => {
+      if (!guess) return;
+      const letterStatuses = getLetterStatuses(guess, secretWord);
+      guess.split('').forEach((letter, i) => {
+        const currentStatus = statuses[letter];
+        const newStatus = letterStatuses[i];
         
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        // Priority: correct > present > absent
+        if (newStatus === 'correct' || currentStatus === 'correct') {
+          statuses[letter] = 'correct';
+        } else if (newStatus === 'present' || currentStatus === 'present') {
+          statuses[letter] = 'present';
+        } else if (!currentStatus) {
+            statuses[letter] = 'absent';
         }
-        .dark .glass {
-            background: rgba(15, 23, 42, 0.85);
-            border-bottom: 1px solid rgba(30, 41, 59, 0.8);
-        }
+      });
+    });
+    return statuses;
+  };
 
-        .formula-card {
-            transition: all 0.2s ease-in-out;
-        }
-        .formula-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(20, 184, 166, 0.15);
-        }
-        
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
+  const resetGame = () => {
+    setGameState('setup');
+    setSecretWord('');
+    setSetupInput('');
+    setSetupError('');
+    setGuesses(Array(MAX_GUESSES).fill(''));
+    setCurrentGuessIndex(0);
+    setCurrentGuess('');
+    setGameMessage('');
+  };
 
-        .nav-link.active {
-            color: #0d9488;
-            background-color: rgba(20, 184, 166, 0.1);
-            font-weight: 600;
-        }
-        .dark .nav-link.active {
-            color: #2dd4bf;
-            background-color: rgba(45, 212, 191, 0.15);
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 transition-colors duration-300 min-h-screen flex flex-col">
+  const keyboardStatuses = getKeyboardStatuses();
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <button onclick="app.navigate('home')" class="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
-                    <div class="w-9 h-9 rounded-xl bg-physics-500 text-white flex items-center justify-center shadow-md shadow-physics-500/30 font-bold">
-                        <i class="ph ph-atom text-2xl"></i>
-                    </div>
-                    <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Физика</span>
-                </button>
+  if (gameState === 'setup') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white font-sans p-4">
+        <h1 className="text-4xl font-bold mb-8 tracking-widest uppercase">Custom Wordle</h1>
+        <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Player 1: Set the Word</h2>
+          <p className="text-gray-400 mb-6 text-center text-sm">
+            Enter a valid 5-letter word for Player 2 to guess.
+          </p>
+          
+          <input
+            type="text"
+            value={setupInput}
+            onChange={handleSetupInput}
+            placeholder="Type word here"
+            className="w-full bg-gray-700 text-white text-center text-2xl font-bold p-4 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-green-500 uppercase tracking-widest"
+            maxLength={WORD_LENGTH}
+            autoFocus
+          />
+          
+          {setupError && (
+            <p className="text-red-400 text-center mb-4 font-semibold animate-pulse">{setupError}</p>
+          )}
 
-                <!-- Dynamic Nav Menu Container -->
-                <div id="nav-menu-container" class="hidden md:flex space-x-1 items-center overflow-x-auto py-1">
-                    <!-- Nav items will be injected here by JS -->
-                </div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-2">
-                    <button id="btn-back-home" onclick="app.navigate('home')" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-physics-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-physics-400 dark:hover:bg-slate-800 transition-colors">
-                        <i class="ph ph-arrow-left"></i> К темам
-                    </button>
-
-                    <button id="themeToggle" onclick="app.toggleTheme()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none">
-                        <i class="ph ph-moon text-xl dark:hidden block"></i>
-                        <i class="ph ph-sun text-xl hidden dark:block"></i>
-                    </button>
-                </div>
-            </div>
+          <button
+            onClick={startPlaying}
+            disabled={setupInput.length !== WORD_LENGTH}
+            className={`w-full p-4 rounded font-bold text-lg transition-colors ${
+              setupInput.length === WORD_LENGTH 
+                ? 'bg-green-600 hover:bg-green-500 text-white cursor-pointer' 
+                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Start Game
+          </button>
         </div>
-    </nav>
+      </div>
+    );
+  }
 
-    <!-- HOME VIEW (TOPIC MENU) -->
-    <div id="view-home" class="view-section active flex-1 pt-28 pb-20">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <header class="text-center mb-12 relative">
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-72 bg-physics-300/20 rounded-full blur-3xl -z-10 dark:bg-physics-900/30"></div>
-                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4">
-                    Интерактивные конспекты
-                </h1>
-                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                    Изучайте физику легко: структурированная теория, подробные выводы формул и интерактивные калькуляторы.
-                </p>
-            </header>
+  const rows = guesses.map((guess, i) => {
+    const isCurrentRow = i === currentGuessIndex;
+    const isSubmitted = i < currentGuessIndex;
+    let content = guess;
+    let statuses = Array(WORD_LENGTH).fill('');
 
-            <!-- Topics Grid -->
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="topics-grid">
-                
-                <!-- Topic Card 1: Electricity -->
-                <button onclick="app.navigate('topic', 'electricity')" class="group text-left bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl border border-slate-200 dark:border-slate-700 hover:border-physics-400 dark:hover:border-physics-500 transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden focus:outline-none">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-physics-500/20 to-blue-500/20 rounded-full blur-2xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
-                    
-                    <div class="w-12 h-12 rounded-xl bg-physics-100 dark:bg-physics-900/50 flex items-center justify-center text-physics-600 dark:text-physics-400 mb-5 relative z-10">
-                        <i class="ph ph-lightning text-2xl"></i>
-                    </div>
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-physics-100 text-physics-800 dark:bg-physics-900/60 dark:text-physics-300 mb-2">
-                        Доступен
-                    </span>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 relative z-10">Электричество</h3>
-                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-4 relative z-10">
-                        Ток, напряжение, микроскопический вывод закона Ома, сопротивление и калькуляторы.
-                    </p>
-                    <div class="flex items-center text-sm font-semibold text-physics-600 dark:text-physics-400 group-hover:translate-x-1 transition-transform relative z-10">
-                        Открыть конспект <i class="ph ph-arrow-right ml-1"></i>
-                    </div>
-                </button>
+    if (isCurrentRow) {
+      content = currentGuess.padEnd(WORD_LENGTH, ' ');
+    } else if (!isSubmitted) {
+      content = '     ';
+    } else {
+      statuses = getLetterStatuses(guess, secretWord);
+    }
 
-                <!-- Topic Card 2: Mechanics (Upcoming) -->
-                <div class="group relative bg-white/50 dark:bg-slate-800/40 rounded-2xl p-6 border border-slate-200 border-dashed dark:border-slate-700 opacity-75">
-                    <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-400 mb-5">
-                        <i class="ph ph-car-profile text-2xl"></i>
-                    </div>
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 mb-2">
-                        В разработке
-                    </span>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Кинематика</h3>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                        Равномерное и равноускоренное движение, скорость, ускорение и баллистика.
-                    </p>
-                </div>
+    return (
+      <div key={i} className="flex gap-2 mb-2 justify-center">
+        {content.split('').map((letter, j) => {
+          let bgColor = 'bg-transparent border-gray-600'; // empty
+          let textColor = 'text-white';
+          let borderColor = 'border-gray-600';
 
-                <!-- Topic Card 3: Thermodynamics (Upcoming) -->
-                <div class="group relative bg-white/50 dark:bg-slate-800/40 rounded-2xl p-6 border border-slate-200 border-dashed dark:border-slate-700 opacity-75">
-                    <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-400 mb-5">
-                        <i class="ph ph-thermometer text-2xl"></i>
-                    </div>
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 mb-2">
-                        В разработке
-                    </span>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Термодинамика</h3>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                        Молекулярно-кинетическая теория, работа газа и первое начало термодинамики.
-                    </p>
-                </div>
+          if (letter !== ' ' && !isSubmitted) {
+             borderColor = 'border-gray-400';
+          }
 
-            </div>
-        </div>
-    </div>
-
-    <!-- TOPIC VIEW CONTAINER -->
-    <div id="view-topic" class="view-section flex-1">
-        
-        <!-- TOPIC: ELECTRICITY -->
-        <div id="topic-electricity" class="topic-content hidden">
-            
-            <!-- Header Section -->
-            <header class="pt-28 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative">
-                <div class="absolute top-20 right-10 w-64 h-64 bg-physics-300/20 rounded-full blur-3xl -z-10 dark:bg-physics-900/30"></div>
-                
-                <button onclick="app.navigate('home')" class="md:hidden flex items-center gap-2 mb-6 text-sm font-medium text-slate-500 hover:text-physics-600 dark:hover:text-physics-400">
-                    <i class="ph ph-arrow-left"></i> Назад к темам
-                </button>
-
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-physics-100 text-physics-700 dark:bg-physics-900/50 dark:text-physics-300 text-xs sm:text-sm font-semibold mb-4 border border-physics-200 dark:border-physics-800">
-                    <i class="ph ph-book-open"></i> Раздел 1. Электродинамика
-                </div>
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
-                    Электрический ток, <span class="text-transparent bg-clip-text bg-gradient-to-r from-physics-500 to-blue-500">напряжение</span> и закон Ома
-                </h1>
-                <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Подробный конспект теории, математический вывод закона Ома из первых принципов и интерактивные решения задач.
-                </p>
-            </header>
-
-            <!-- Main Content Sections -->
-            <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-12">
-
-                <!-- 1. ЭЛЕКТРИЧЕСКИЙ ЗАРЯД -->
-                <section id="charge" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold border border-blue-200 dark:border-blue-800">
-                            1
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Электрический заряд</h2>
-                    </div>
-                    
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
-                        <p class="text-slate-700 dark:text-slate-300">
-                            <strong>Электрический заряд ($q$ или $Q$)</strong> — это скалярная физическая величина, определяющая способность тел вступать в электромагнитное взаимодействие. Измеряется в <strong>кулонах (Кл)</strong>.
-                        </p>
-                        
-                        <div class="grid sm:grid-cols-2 gap-4 pt-2">
-                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-700/80">
-                                <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">Элементарный заряд</div>
-                                <div class="text-lg font-mono text-physics-600 dark:text-physics-400 font-semibold">
-                                    $$e = 1.6 \times 10^{-19} \text{ Кл}$$
-                                </div>
-                            </div>
-                            
-                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-100 dark:border-slate-700/80">
-                                <div class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">Заряд электрона</div>
-                                <div class="text-lg font-mono text-blue-600 dark:text-blue-400 font-semibold">
-                                    $$q_e = -1.6 \times 10^{-19} \text{ Кл}$$
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 2. СИЛА ТОКА -->
-                <section id="current" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-800">
-                            2
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Сила тока</h2>
-                    </div>
-
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                        <p class="text-slate-700 dark:text-slate-300 border-l-4 border-physics-500 pl-4 py-0.5 font-medium">
-                            <strong>Сила тока ($I$)</strong> — физическая величина, равная отношению заряда $\Delta q$, прошедшего через поперечное сечение проводника, ко времени $\Delta t$.
-                        </p>
-
-                        <div class="bg-physics-50 dark:bg-physics-950/40 p-6 rounded-xl border border-physics-200 dark:border-physics-800/60 formula-card flex flex-col md:flex-row items-center gap-6">
-                            <div class="text-2xl sm:text-3xl font-mono text-physics-700 dark:text-physics-300 font-bold">
-                                $$I = \frac{\Delta q}{\Delta t}$$
-                            </div>
-                            <div class="text-sm text-slate-600 dark:text-slate-300 space-y-1 border-t md:border-t-0 md:border-l border-physics-200 dark:border-physics-800 pt-4 md:pt-0 md:pl-6 w-full">
-                                <p><strong class="font-mono text-physics-600 dark:text-physics-400">I</strong> — сила тока, Ампер (А)</p>
-                                <p><strong class="font-mono text-physics-600 dark:text-physics-400">q</strong> — проходящий заряд, Кулон (Кл)</p>
-                                <p><strong class="font-mono text-physics-600 dark:text-physics-400">t</strong> — время протекания, Секунда (с)</p>
-                            </div>
-                        </div>
-
-                        <!-- Microscopic current model -->
-                        <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                                <i class="ph ph-atom text-physics-500"></i> Микроскопическая формула силы тока
-                            </h3>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                                Если электроны движутся со средней скоростью дрейфа $v$ в проводнике сечением $S$ и концентрацией носителей $n$:
-                            </p>
-                            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl text-center text-xl font-mono text-physics-600 dark:text-physics-400 font-bold border border-slate-200 dark:border-slate-700">
-                                $$I = q \cdot n \cdot v \cdot S$$
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3. НАПРЯЖЕНИЕ -->
-                <section id="voltage" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-800">
-                            3
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Электрическое напряжение</h2>
-                    </div>
-
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                        <p class="text-slate-700 dark:text-slate-300 border-l-4 border-rose-500 pl-4 py-0.5 font-medium">
-                            <strong>Напряжение ($U$)</strong> — это отношение работы электрического поля по перемещению заряда к величине этого заряда.
-                        </p>
-
-                        <div class="bg-rose-50/50 dark:bg-rose-950/30 p-6 rounded-xl border border-rose-200 dark:border-rose-900/50 formula-card flex flex-col md:flex-row items-center gap-6">
-                            <div class="text-2xl sm:text-3xl font-mono text-rose-700 dark:text-rose-300 font-bold">
-                                $$U = \frac{A}{q}$$
-                            </div>
-                            <div class="text-sm text-slate-600 dark:text-slate-300 space-y-1 border-t md:border-t-0 md:border-l border-rose-200 dark:border-rose-900/50 pt-4 md:pt-0 md:pl-6 w-full">
-                                <p><strong class="font-mono text-rose-600 dark:text-rose-400">U</strong> — напряжение, Вольт (В)</p>
-                                <p><strong class="font-mono text-rose-600 dark:text-rose-400">A</strong> — работа электрического поля, Джоуль (Дж)</p>
-                                <p><strong class="font-mono text-rose-600 dark:text-rose-400">q</strong> — перемещаемый заряд, Кулон (Кл)</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3.5 ВЫВОД ЗАКОНА ОМА -->
-                <section id="derivation" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold border border-purple-200 dark:border-purple-800">
-                            <i class="ph ph-flask"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Теоретический вывод закона Ома</h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Микроскопическая модель Друде</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                        
-                        <div class="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-xl border border-purple-200 dark:border-purple-900/40">
-                            <h3 class="font-bold text-purple-900 dark:text-purple-300 text-sm mb-2 flex items-center gap-1.5">
-                                <i class="ph ph-lightbulb"></i> Гипотеза о силе сопротивления
-                            </h3>
-                            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-                                Сила сопротивления решётки проводника пропорциональна скорости дрейфа электронов: $F_{\text{сопр}} = k \cdot v$.
-                            </p>
-                        </div>
-
-                        <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300">
-                            <div>
-                                <strong class="text-slate-900 dark:text-white">1. Равновесие сил:</strong> Электрическая сила уравновешивается силой сопротивления:
-                                <div class="my-2 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg text-center font-mono">
-                                    $$F_{\text{эл}} = F_{\text{сопр}} \implies q \cdot E = k \cdot v \implies v = \frac{q \cdot E}{k}$$
-                                </div>
-                            </div>
-
-                            <div>
-                                <strong class="text-slate-900 dark:text-white">2. Выразим напряжённость поля через напряжение $U$ и длину $L$:</strong>
-                                <div class="my-2 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-lg text-center font-mono">
-                                    $$E = \frac{U}{L} \implies v = \frac{q \cdot U}{k \cdot L}$$
-                                </div>
-                            </div>
-
-                            <div>
-                                <strong class="text-slate-900 dark:text-white">3. Подставим скорость дрейфа $v$ в силу тока $I = q n v S$:</strong>
-                                <div class="my-2 bg-physics-50 dark:bg-physics-950/40 p-4 rounded-lg text-center font-mono text-physics-700 dark:text-physics-300 font-bold text-base">
-                                    $$I = q \cdot n \cdot \left(\frac{q \cdot U}{k \cdot L}\right) \cdot S = U \cdot \left(\frac{n q^2}{k}\right) \cdot \frac{S}{L}$$
-                                </div>
-                            </div>
-
-                            <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                <p class="mb-2">Обозначив коэффициент $\rho = \frac{k}{n q^2}$ (удельное сопротивление), получаем сопротивление $R$ и закон Ома:</p>
-                                <div class="grid sm:grid-cols-2 gap-3 text-center font-mono">
-                                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg border border-emerald-200 dark:border-emerald-900/40 font-bold text-emerald-700 dark:text-emerald-300">
-                                        $$R = \rho \frac{L}{S}$$
-                                    </div>
-                                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-lg border border-emerald-200 dark:border-emerald-900/40 font-bold text-emerald-700 dark:text-emerald-300">
-                                        $$I = \frac{U}{R}$$
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <!-- 4. ЗАКОН ОМА -->
-                <section id="ohm" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-                            4
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Закон Ома для участка цепи</h2>
-                    </div>
-
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                        <p class="text-slate-700 dark:text-slate-300 font-medium">
-                            Сила тока в участке цепи прямо пропорциональна напряжению на концах этого участка и обратно пропорциональна его сопротивлению.
-                        </p>
-
-                        <div class="bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-xl border border-emerald-200 dark:border-emerald-900/50 text-center">
-                            <div class="text-3xl sm:text-4xl font-mono text-emerald-700 dark:text-emerald-300 font-bold">
-                                $$I = \frac{U}{R}$$
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- INTERACTIVE CALCULATOR SECTION -->
-                <section id="calculator" class="scroll-mt-24 topic-section">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-9 h-9 rounded-xl bg-physics-500 text-white flex items-center justify-center font-bold shadow-md shadow-physics-500/20">
-                            <i class="ph ph-calculator text-lg"></i>
-                        </div>
-                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Интерактивный калькулятор</h2>
-                    </div>
-
-                    <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-6">
-                        <h3 class="font-bold text-slate-900 dark:text-white text-lg">Расчёт по закону Ома</h3>
-                        
-                        <div class="grid sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Напряжение U (В)</label>
-                                <input type="number" id="calc-u" value="12" step="0.1" oninput="app.calculateOhm()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-physics-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Сопротивление R (Ом)</label>
-                                <input type="number" id="calc-r" value="4" step="0.1" oninput="app.calculateOhm()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-physics-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Сила тока I (А)</label>
-                                <div id="calc-i-result" class="w-full bg-physics-50 dark:bg-physics-950/50 border border-physics-300 dark:border-physics-800 rounded-xl px-3 py-2 text-physics-700 dark:text-physics-300 font-mono font-bold text-lg flex items-center">
-                                    3.00 А
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Resistance calculation from dimensions -->
-                        <div class="pt-6 border-t border-slate-200 dark:border-slate-700 space-y-4">
-                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">Расчёт сопротивления проводника</h3>
-                            
-                            <div class="grid sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Материал</label>
-                                    <select id="calc-mat" onchange="app.calculateRes()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 text-sm focus:ring-2 focus:ring-physics-500 focus:outline-none">
-                                        <option value="0.017">Медь (0.017 Ом·мм²/м)</option>
-                                        <option value="0.028">Алюминий (0.028 Ом·мм²/м)</option>
-                                        <option value="0.1">Железо (0.100 Ом·мм²/м)</option>
-                                        <option value="1.1">Нихром (1.100 Ом·мм²/м)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Длина L (м)</label>
-                                    <input type="number" id="calc-l" value="10" step="1" oninput="app.calculateRes()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-physics-500 focus:outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Сечение S (мм²)</label>
-                                    <input type="number" id="calc-s" value="1.5" step="0.1" oninput="app.calculateRes()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 font-mono focus:ring-2 focus:ring-physics-500 focus:outline-none">
-                                </div>
-                            </div>
-
-                            <div class="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                                <span class="text-sm text-slate-600 dark:text-slate-400 font-medium">Рассчитанное сопротивление:</span>
-                                <span id="calc-r-result" class="text-xl font-mono font-bold text-physics-600 dark:text-physics-400">0.113 Ом</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5. СВОДКА ФОРМУЛ И ЕДИНИЦ -->
-                <div class="grid lg:grid-cols-2 gap-6">
-                    <section id="formulas" class="scroll-mt-24 topic-section">
-                        <div class="bg-physics-600 dark:bg-physics-900 rounded-2xl p-6 text-white shadow-lg space-y-4">
-                            <h3 class="text-lg font-bold flex items-center gap-2">
-                                <i class="ph ph-function"></i> Формулы темы
-                            </h3>
-                            <div class="grid grid-cols-2 gap-3 font-mono text-center text-sm">
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$I = \frac{\Delta q}{\Delta t}$$</div>
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$I = q n v S$$</div>
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$U = \frac{A}{q}$$</div>
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$I = \frac{U}{R}$$</div>
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$R = \rho \frac{L}{S}$$</div>
-                                <div class="bg-white/10 rounded-xl py-3 border border-white/10">$$\rho = \frac{k}{n q^2}$$</div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section id="units" class="topic-section">
-                        <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="ph ph-ruler"></i> Единицы измерения
-                            </h3>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-700/60">
-                                    <span class="text-slate-500 dark:text-slate-400">Заряд ($q$)</span>
-                                    <span class="font-mono font-semibold">Кл (Кулон)</span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-700/60">
-                                    <span class="text-slate-500 dark:text-slate-400">Сила тока ($I$)</span>
-                                    <span class="font-mono font-semibold">А (Ампер)</span>
-                                </div>
-                                <div class="flex justify-between py-1 border-b border-slate-100 dark:border-slate-700/60">
-                                    <span class="text-slate-500 dark:text-slate-400">Напряжение ($U$)</span>
-                                    <span class="font-mono font-semibold">В (Вольт)</span>
-                                </div>
-                                <div class="flex justify-between py-1">
-                                    <span class="text-slate-500 dark:text-slate-400">Сопротивление ($R$)</span>
-                                    <span class="font-mono font-semibold">Ом</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-            </main>
-        </div>
-
-    </div>
-
-    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-6 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 text-center text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-            Интерактивный учебный конспект по физике
-        </div>
-    </footer>
-
-    <script>
-        const navigationData = {
-            'electricity': [
-                { id: 'charge', label: 'Заряд' },
-                { id: 'current', label: 'Ток' },
-                { id: 'voltage', label: 'Напряжение' },
-                { id: 'derivation', label: 'Вывод Ома' },
-                { id: 'ohm', label: 'Закон Ома' },
-                { id: 'calculator', label: 'Калькулятор' }
-            ]
-        };
-
-        const app = {
-            currentTopic: null,
-
-            init() {
-                this.setupTheme();
-                this.navigate('home');
-                this.setupScrollSpy();
-                this.calculateOhm();
-                this.calculateRes();
-            },
-
-            renderMath() {
-                if (typeof renderMathInElement === 'function') {
-                    renderMathInElement(document.body, {
-                        delimiters: [
-                            {left: '$$', right: '$$', display: true},
-                            {left: '$', right: '$', display: false},
-                            {left: '\\(', right: '\\)', display: false},
-                            {left: '\\[', right: '\\]', display: true}
-                        ],
-                        throwOnError: false
-                    });
-                } else {
-                    setTimeout(() => this.renderMath(), 100);
-                }
-            },
-
-            navigate(view, topicId = null) {
-                const homeView = document.getElementById('view-home');
-                const topicView = document.getElementById('view-topic');
-                const backBtn = document.getElementById('btn-back-home');
-                const navContainer = document.getElementById('nav-menu-container');
-
-                if (view === 'home') {
-                    this.currentTopic = null;
-                    homeView.classList.add('active');
-                    homeView.style.display = 'block';
-                    topicView.classList.remove('active');
-                    topicView.style.display = 'none';
-                    if (backBtn) backBtn.classList.add('hidden');
-                    if (navContainer) navContainer.innerHTML = '';
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else if (view === 'topic' && topicId) {
-                    this.currentTopic = topicId;
-                    homeView.classList.remove('active');
-                    homeView.style.display = 'none';
-                    topicView.classList.add('active');
-                    topicView.style.display = 'block';
-
-                    document.querySelectorAll('.topic-content').forEach(el => el.classList.add('hidden'));
-                    const activeTopicEl = document.getElementById(`topic-${topicId}`);
-                    if (activeTopicEl) {
-                        activeTopicEl.classList.remove('hidden');
-                    }
-
-                    if (backBtn) backBtn.classList.remove('hidden');
-                    this.renderNavMenu(topicId);
-
-                    // Re-render formulas safely when section turns visible
-                    setTimeout(() => this.renderMath(), 50);
-
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            },
-
-            renderNavMenu(topicId) {
-                const navContainer = document.getElementById('nav-menu-container');
-                if (!navContainer) return;
-                const items = navigationData[topicId] || [];
-                navContainer.innerHTML = items.map(item => `
-                    <button id="nav-btn-${item.id}" onclick="app.scrollToSection('${item.id}')" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">
-                        ${item.label}
-                    </button>
-                `).join('');
-            },
-
-            scrollToSection(id) {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            },
-
-            setupScrollSpy() {
-                window.addEventListener('scroll', () => {
-                    if (!this.currentTopic) return;
-                    const items = navigationData[this.currentTopic] || [];
-                    let currentActive = '';
-
-                    items.forEach(item => {
-                        const el = document.getElementById(item.id);
-                        if (el) {
-                            const rect = el.getBoundingClientRect();
-                            if (rect.top <= 150) {
-                                currentActive = item.id;
-                            }
-                        }
-                    });
-
-                    items.forEach(item => {
-                        const btn = document.getElementById(`nav-btn-${item.id}`);
-                        if (btn) {
-                            if (item.id === currentActive) {
-                                btn.classList.add('active');
-                            } else {
-                                btn.classList.remove('active');
-                            }
-                        }
-                    });
-                });
-            },
-
-            calculateOhm() {
-                const u = parseFloat(document.getElementById('calc-u').value) || 0;
-                const r = parseFloat(document.getElementById('calc-r').value) || 0.0001;
-                const i = u / r;
-                document.getElementById('calc-i-result').innerText = `${i.toFixed(2)} А`;
-            },
-
-            calculateRes() {
-                const rho = parseFloat(document.getElementById('calc-mat').value) || 0;
-                const l = parseFloat(document.getElementById('calc-l').value) || 0;
-                const s = parseFloat(document.getElementById('calc-s').value) || 0.0001;
-                const res = (rho * l) / s;
-                document.getElementById('calc-r-result').innerText = `${res.toFixed(3)} Ом`;
-            },
-
-            setupTheme() {
-                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            },
-
-            toggleTheme() {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.theme = 'light';
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.theme = 'dark';
-                }
+          if (isSubmitted) {
+            borderColor = 'border-transparent';
+            if (statuses[j] === 'correct') {
+              bgColor = 'bg-green-600';
+            } else if (statuses[j] === 'present') {
+              bgColor = 'bg-yellow-500';
+            } else {
+              bgColor = 'bg-gray-700';
             }
-        };
+          }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
-    </script>
-</body>
-</html>
+          return (
+            <div
+              key={j}
+              className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center text-3xl font-bold uppercase border-2 ${bgColor} ${borderColor} ${textColor} transition-colors duration-500`}
+            >
+              {letter}
+            </div>
+          );
+        })}
+      </div>
+    );
+  });
+
+  const keyboardRows = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace']
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-between min-h-screen bg-gray-900 text-white font-sans py-4 sm:py-8">
+      
+      <header className="w-full max-w-lg border-b border-gray-700 pb-4 mb-4 flex justify-between items-center px-4 relative">
+         <div className="w-8"></div> {/* Spacer for centering */}
+         <h1 className="text-3xl font-bold tracking-widest uppercase text-center flex-grow">Wordle</h1>
+         <button onClick={resetGame} className="text-gray-400 hover:text-white transition-colors" title="Restart Game">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+         </button>
+      </header>
+
+      {/* Message Toast */}
+      <div className="relative h-12 w-full flex justify-center items-center">
+        {gameMessage && (
+            <div className="absolute top-0 bg-white text-black font-semibold px-4 py-3 rounded shadow-lg z-10 animate-bounce">
+            {gameMessage}
+            </div>
+        )}
+      </div>
+
+      <div className="flex-grow flex flex-col justify-center mb-6">
+        {rows}
+      </div>
+
+      <div className="w-full max-w-lg px-2">
+        {keyboardRows.map((row, i) => (
+          <div key={i} className="flex justify-center gap-1 sm:gap-2 mb-2">
+            {row.map((key) => {
+              let bg = 'bg-gray-500';
+              const status = keyboardStatuses[key];
+              
+              if (status === 'correct') bg = 'bg-green-600';
+              else if (status === 'present') bg = 'bg-yellow-500';
+              else if (status === 'absent') bg = 'bg-gray-800';
+              
+              const isSpecialKey = key === 'Enter' || key === 'Backspace';
+              
+              return (
+                <button
+                  key={key}
+                  onClick={() => onKeyPress(key)}
+                  className={`
+                    ${bg} hover:opacity-80
+                    text-white font-bold rounded
+                    ${isSpecialKey ? 'px-2 sm:px-4 text-xs sm:text-sm' : 'w-8 h-12 sm:w-11 sm:h-14 text-sm sm:text-lg'}
+                    flex items-center justify-center transition-colors uppercase select-none
+                  `}
+                >
+                  {key === 'Backspace' ? (
+                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
+                     </svg>
+                  ) : key}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      
+      {(gameState === 'won' || gameState === 'lost') && (
+          <div className="mt-8">
+              <button 
+                onClick={resetGame}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105"
+              >
+                  Play Again
+              </button>
+          </div>
+      )}
+
+    </div>
+  );
+};
+
+export default App;
