@@ -28,11 +28,21 @@
     }
   </script>
 
-  <!-- KaTeX for Beautiful Math Formulas -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
-          onload="renderMathInElement(document.body);"></script>
+  <!-- MathJax Configuration & Engine -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
   <style>
     .glass {
@@ -64,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Quick Section Jump Links (Topic Mode) -->
+      <!-- Quick Section Jump Links -->
       <nav id="sectionNav" class="hidden md:flex items-center space-x-1 text-sm font-medium text-slate-300">
         <a href="#section-charge" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Заряд и Ток</a>
         <a href="#section-voltage" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Напряжение</a>
@@ -96,13 +106,13 @@
           Выберите тему конспекта
         </h1>
         <p class="text-slate-400 text-base">
-          Интерактивные конспекты, точные формулы, микроскопические выводы и практические расчеты strictly по пройденным лекциям.
+          Интерактивные конспекты, точные формулы, микроскопические выводы и практические расчеты строго по лекциям.
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
         
-        <!-- CARD 1: ЭЛЕКТРИЧЕСТВО -->
+        <!-- CARD 1: ELECTRICITY -->
         <div onclick="app.openTopic('electricity')" 
              class="group relative bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 hover:border-brand-500 rounded-2xl p-6 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-brand-500/10 flex flex-col justify-between">
           <div>
@@ -141,7 +151,7 @@
         </div>
       </div>
 
-      <!-- SECTION 1: ZARYAD & TOK -->
+      <!-- SECTION 1: CHARGE & CURRENT -->
       <section id="section-charge" class="space-y-6">
         <div class="flex items-center space-x-3 border-l-4 border-brand-500 pl-4">
           <h2 class="text-2xl font-bold text-white">1. Электрический заряд и сила тока</h2>
@@ -155,28 +165,28 @@
               <span>Электрический заряд</span>
             </h3>
             <p class="text-slate-300 text-sm leading-relaxed">
-              Количество электрического заряда измеряется в <strong>кулонах (Кл)</strong>. Заряд одного электрона равен по модулю:
+              Количество электрического заряда измеряется в <strong>кулонах (Кл)</strong>[cite: 1]. Заряд одного электрона равен по модулю[cite: 1]:
             </p>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center text-lg font-mono text-brand-300">
-              $|e| = 1{,}6 \cdot 10^{-19} \text{ Кл}$
+              $$|e| = 1{,}6 \cdot 10^{-19} \text{ Кл}$$
             </div>
-            <p class="text-xs text-slate-400">Электрон обладает отрицательным зарядом: $e = -1{,}6 \cdot 10^{-19} \text{ Кл}$.</p>
+            <p class="text-xs text-slate-400">Электрон обладает отрицательным зарядом: $e = -1{,}6 \cdot 10^{-19} \text{ Кл}$[cite: 1].</p>
           </div>
 
           <!-- Current -->
           <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
             <h3 class="text-lg font-bold text-brand-400">Сила тока (Макроопределение)</h3>
             <p class="text-slate-300 text-sm leading-relaxed">
-              <strong>Сила тока</strong> — это количество электрического заряда, проходящего через поперечное сечение проводника за единицу времени.
+              <strong>Сила тока</strong> — это количество электрического заряда, проходящего через поперечное сечение проводника за единицу времени[cite: 1].
             </p>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center text-lg font-mono text-emerald-400">
-              $I = \frac{Q}{t}$
+              $$I = \frac{Q}{t}$$
             </div>
             <div class="text-xs text-slate-400 space-y-1">
-              <p>• $I$ — сила тока в <strong>амперах (А)</strong></p>
-              <p>• $Q$ — заряд в <strong>кулонах (Кл)</strong></p>
-              <p>• $t$ — время в <strong>секундах (с)</strong></p>
-              <p class="pt-1 font-semibold text-slate-300">Определение: $1\text{ А} = \frac{1\text{ Кл}}{1\text{ с}}$. Измеряется амперметром (последовательно).</p>
+              <p>• $I$ — сила тока в <strong>амперах (А)</strong>[cite: 1]</p>
+              <p>• $Q$ — заряд в <strong>кулонах (Кл)</strong>[cite: 1]</p>
+              <p>• $t$ — время в <strong>секундах (с)</strong>[cite: 1]</p>
+              <p class="pt-1 font-semibold text-slate-300">Определение: $1\text{ А} = \frac{1\text{ Кл}}{1\text{ с}}$[cite: 1]. Измеряется амперметром (последовательно)[cite: 1].</p>
             </div>
           </div>
 
@@ -186,22 +196,22 @@
         <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
           <h3 class="text-lg font-bold text-amber-400">Микроскопическая модель тока (Из лекции)</h3>
           <p class="text-slate-300 text-sm leading-relaxed">
-            Пусть электроны бегут по проводу со скоростью $v$. Заряд каждого электрона равен $q$. Концентрация электронов в материале равна $n$ (количество на единицу объема).
+            Пусть электроны бегут по проводу со скоростью $v$. Заряд каждого электрона равен $q$. Концентрация электронов в материале равна $n$ (количество на единицу объема)[cite: 2].
           </p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
             <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2">
-              <p class="text-xs text-slate-400">За время $t$ из сечения высунется столбик электронов длиной $vt$ и объемом $v t S$ (где $S$ — площадь сечения).</p>
-              <p class="text-xs text-slate-400">За время $t$ сквозь сечение пройдет заряд: $Q = v t S n q$.</p>
+              <p class="text-xs text-slate-400">За время $t$ из сечения высунется столбик электронов длиной $vt$ и объемом $v t S$ (где $S$ — площадь сечения)[cite: 2].</p>
+              <p class="text-xs text-slate-400">За время $t$ сквозь сечение пройдет заряд: $Q = v t S n q$[cite: 2].</p>
               <div class="text-center text-xl font-bold text-amber-300 pt-2 border-t border-slate-800">
-                $I = v S n q$
+                $$I = v S n q$$
               </div>
             </div>
             <div class="text-xs text-slate-400 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 leading-relaxed">
               <p class="font-semibold text-slate-200 mb-1">Компоненты формулы:</p>
-              <p>• $v$ — скорость направленного движения (дрейфа)</p>
-              <p>• $S$ — площадь поперечного сечения проводника</p>
-              <p>• $n$ — концентрация свободных носителей заряда</p>
-              <p>• $q$ — заряд одной частицы (электрона)</p>
+              <p>• $v$ — скорость направленного движения (дрейфа)[cite: 2]</p>
+              <p>• $S$ — площадь поперечного сечения проводника[cite: 2]</p>
+              <p>• $n$ — концентрация свободных носителей заряда[cite: 2]</p>
+              <p>• $q$ — заряд одной частицы (электрона)[cite: 2]</p>
             </div>
           </div>
         </div>
@@ -215,29 +225,29 @@
 
         <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
           <p class="text-slate-300 text-sm leading-relaxed">
-            При движении электронов от точки A к точке B электрическая сила совершает работу. <strong>Напряжение ($U$)</strong> — это работа электрической силы, приходящаяся на единицу электрического заряда, прошедшего через участок цепи.
+            При движении электронов от точки A к точке B электрическая сила совершает работу[cite: 1]. <strong>Напряжение ($U$)</strong> — это работа электрической силы, приходящаяся на единицу электрического заряда, прошедшего через участок цепи[cite: 1].
           </p>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
               <div class="text-xs text-slate-400 mb-1">Основная формула</div>
-              <div class="text-xl font-bold text-brand-300">$U = \frac{A}{Q}$</div>
-              <div class="text-xs text-slate-500 mt-1">$1\text{ В} = \frac{1\text{ Дж}}{1\text{ Кл}}$</div>
+              <div class="text-xl font-bold text-brand-300">$$U = \frac{A}{Q}$$</div>
+              <div class="text-xs text-slate-500 mt-1">$1\text{ В} = \frac{1\text{ Дж}}{1\text{ Кл}}$[cite: 1]</div>
             </div>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
               <div class="text-xs text-slate-400 mb-1">Выражение через $I$ и $t$</div>
-              <div class="text-xl font-bold text-brand-300">$U = \frac{A}{I \cdot t}$</div>
-              <div class="text-xs text-slate-500 mt-1">так как $Q = I \cdot t$</div>
+              <div class="text-xl font-bold text-brand-300">$$U = \frac{A}{I \cdot t}$$</div>
+              <div class="text-xs text-slate-500 mt-1">так как $Q = I \cdot t$[cite: 1]</div>
             </div>
           </div>
 
           <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80 text-sm space-y-2">
             <p class="font-semibold text-brand-400">Как наглядно понимать напряжение?</p>
             <p class="text-slate-300 text-xs leading-relaxed">
-              Напряжение показывает, сколько энергии передается каждому кулону заряда при перемещении между двумя точками.
+              Напряжение показывает, сколько энергии передается каждому кулону заряда при перемещении между двумя точками[cite: 1].
             </p>
             <p class="text-slate-400 text-xs italic">
-              Например: Если напряжение равно $5\text{ В}$, электрическая сила совершает работу $5\text{ Дж}$ на каждый $1\text{ Кл}$ прошедшего заряда. Измеряется вольтметром (параллельно).
+              Например: Если напряжение равно $5\text{ В}$, электрическая сила совершает работу $5\text{ Дж}$ на каждый $1\text{ Кл}$ прошедшего заряда[cite: 1]. Измеряется вольтметром (параллельно)[cite: 1].
             </p>
           </div>
         </div>
@@ -253,7 +263,7 @@
           <div class="bg-purple-950/30 border border-purple-800/50 p-4 rounded-xl">
             <h3 class="font-bold text-purple-300 text-sm mb-1">Гипотеза:</h3>
             <p class="text-slate-300 text-xs leading-relaxed">
-              Сила сопротивления движению электронов пропорциональна их скорости: <strong class="text-purple-200">$F_{\text{сопр}} = k \cdot v$</strong> (где $k$ — коэффициент сопротивления среды).
+              Сила сопротивления движению электронов пропорциональна их скорости: <strong class="text-purple-200">$F_{\text{сопр}} = k \cdot v$</strong> (где $k$ — коэффициент сопротивления среды)[cite: 2, 4].
             </p>
           </div>
 
@@ -263,26 +273,26 @@
             <div class="grid grid-cols-1 gap-3 text-xs">
               <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
                 <span class="text-purple-400 font-bold">1. Связь силы поля и напряжения:</span>
-                <p class="text-slate-300">$U = \frac{F_{\text{электр}} \cdot L}{q} \implies F_{\text{электр}} = \frac{U \cdot q}{L}$</p>
+                <p class="text-slate-300">$$U = \frac{F_{\text{электр}} \cdot L}{q} \implies F_{\text{электр}} = \frac{U \cdot q}{L}$$[cite: 4]</p>
               </div>
 
               <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
                 <span class="text-purple-400 font-bold">2. Установившаяся скорость (баланс сил):</span>
-                <p class="text-slate-300">$F_{\text{сопр}} = F_{\text{электр}} \implies k \cdot v = \frac{U \cdot q}{L} \implies v = \frac{U \cdot q}{L \cdot k}$</p>
+                <p class="text-slate-300">$$F_{\text{сопр}} = F_{\text{электр}} \implies k \cdot v = \frac{U \cdot q}{L} \implies v = \frac{U \cdot q}{L \cdot k}$$[cite: 4]</p>
               </div>
 
               <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
                 <span class="text-purple-400 font-bold">3. Подстановка в микроскопический ток $I = v S n q$:</span>
-                <p class="text-slate-300">$I = \left( \frac{U \cdot q}{L \cdot k} \right) \cdot S \cdot n \cdot q = U \cdot \frac{S}{L} \cdot \frac{n q^2}{k}$</p>
+                <p class="text-slate-300">$$I = \left( \frac{U \cdot q}{L \cdot k} \right) \cdot S \cdot n \cdot q = U \cdot \frac{S}{L} \cdot \frac{n q^2}{k}$$[cite: 4]</p>
               </div>
             </div>
           </div>
 
           <div class="bg-slate-900/90 p-4 rounded-xl border border-purple-500/30 text-center space-y-2">
-            <p class="text-xs text-slate-400">Обозначили сопротивление как $\frac{1}{R}$, тогда:</p>
-            <div class="text-xl font-bold text-purple-300">$I = \frac{U}{R}$</div>
+            <p class="text-xs text-slate-400">Обозначили сопротивление как $\frac{1}{R}$, тогда:[cite: 4]</p>
+            <div class="text-xl font-bold text-purple-300">$$I = \frac{U}{R}$$</div>
             <p class="text-xs text-slate-400 pt-2 border-t border-slate-800">
-              Где удельное сопротивление: <strong class="text-purple-300">$\rho = \frac{k}{n q^2}$</strong>, а сопротивление провода: <strong class="text-purple-300">$R = \rho \cdot \frac{L}{S}$</strong>.
+              Где удельное сопротивление: <strong class="text-purple-300">$\rho = \frac{k}{n q^2}$</strong>[cite: 4], а сопротивление провода: <strong class="text-purple-300">$R = \rho \cdot \frac{L}{S}$</strong>[cite: 1, 3, 4].
             </p>
           </div>
         </div>
@@ -298,30 +308,30 @@
           <div class="bg-slate-900/90 p-4 rounded-xl border-l-4 border-brand-500 space-y-1">
             <span class="text-xs font-bold text-brand-400 uppercase tracking-wider">Формулировка из лекции</span>
             <p class="text-slate-200 text-sm leading-relaxed font-medium">
-              «Для ЛЮБОГО участка провода, по которому идёт ток, верно следующее: сила тока, текущего через ЭТОТ кусок, равна напряжению на концах ЭТОГО куска, делить на сопротивление ЭТОГО куска.»
+              «Для ЛЮБОГО участка провода, по которому идёт ток, верно следующее: сила тока, текущего через ЭТОТ кусок, равна напряжению на концах ЭТОГО куска, делить на сопротивление ЭТОГО куска.»[cite: 5]
             </p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
               <div class="text-xs text-slate-400 mb-1">Сила тока</div>
-              <div class="text-lg font-bold text-brand-300">$I = \frac{U}{R}$</div>
+              <div class="text-lg font-bold text-brand-300">$$I = \frac{U}{R}$$</div>
             </div>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
               <div class="text-xs text-slate-400 mb-1">Напряжение</div>
-              <div class="text-lg font-bold text-brand-300">$U = I \cdot R$</div>
+              <div class="text-lg font-bold text-brand-300">$$U = I \cdot R$$</div>
             </div>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
               <div class="text-xs text-slate-400 mb-1">Сопротивление</div>
-              <div class="text-lg font-bold text-brand-300">$R = \frac{U}{I}$</div>
+              <div class="text-lg font-bold text-brand-300">$$R = \frac{U}{I}$$</div>
             </div>
           </div>
 
           <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
             <h4 class="font-bold text-slate-200 text-sm">Геометрическая зависимость сопротивления:</h4>
-            <div class="text-center font-mono text-base text-emerald-400 my-2">$R = \rho \cdot \frac{L}{S}$</div>
-            <p class="text-slate-400">• Чем длиннее проводник ($L$), тем больше его сопротивление.</p>
-            <p class="text-slate-400">• Чем больше площадь сечения ($S$), тем меньше сопротивление.</p>
+            <div class="text-center font-mono text-base text-emerald-400 my-2">$$R = \rho \cdot \frac{L}{S}$$</div>
+            <p class="text-slate-400">• Чем длиннее проводник ($L$), тем больше его сопротивление[cite: 1].</p>
+            <p class="text-slate-400">• Чем больше площадь сечения ($S$), тем меньше сопротивление[cite: 1].</p>
           </div>
         </div>
       </section>
@@ -334,19 +344,19 @@
 
         <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
           <p class="text-slate-300 text-sm leading-relaxed">
-            Любой источник тока характеризуется тем, какую работу он может совершить над единицей заряда. Такую величину называют <strong>электродвижущей силой (ЭДС, $\mathcal{E}$)</strong>.
+            Любой источник тока характеризуется тем, какую работу он может совершить над единицей заряда[cite: 5]. Такую величину называют <strong>электродвижущей силой (ЭДС, $\mathcal{E}$)</strong>[cite: 5].
           </p>
 
           <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-sm space-y-2">
             <p class="font-bold text-emerald-400">Пример с батарейкой на 6 Вольт:</p>
             <p class="text-slate-300 text-xs leading-relaxed">
-              На батарейке написано: <strong class="text-white">6 В</strong>. Это значит, что если соединить "+" и "-" этой батарейки любым проводом, то на концах этого провода создастся напряжение около $6\text{ В}$.
+              На батарейке написано: <strong class="text-white">6 В</strong>[cite: 5]. Это значит, что если соединить "+" и "-" этой батарейки любым проводом, то на концах этого провода создастся напряжение около $6\text{ В}$[cite: 5].
             </p>
             <p class="text-slate-400 text-xs italic">
-              Почему «почти»? У любой батарейки есть внутреннее сопротивление ($r$). Малая часть работы источника тратится на преодоление внутреннего сопротивления, поэтому напряжение на концах провода $U$ немного меньше ЭДС:
+              Почему «почти»? У любой батарейки есть внутреннее сопротивление ($r$)[cite: 5]. Малая часть работы источника тратится на преодоление внутреннего сопротивления, поэтому напряжение на концах провода $U$ немного меньше ЭДС[cite: 5]:
             </p>
             <div class="text-center font-bold text-emerald-300 text-lg py-1">
-              $U = \mathcal{E} - I \cdot r$
+              $$U = \mathcal{E} - I \cdot r$$
             </div>
           </div>
         </div>
@@ -360,7 +370,7 @@
 
         <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-6">
           <p class="text-slate-300 text-sm leading-relaxed">
-            На электрических схемах реальные физические элементы заменяются их идеализированными обозначениями:
+            На электрических схемах реальные физические элементы заменяются их идеализированными обозначениями[cite: 6]:
           </p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -370,29 +380,29 @@
               <div class="flex justify-around items-center py-4">
                 <div class="space-y-2">
                   <div class="w-16 h-10 border-2 border-slate-300 mx-auto flex items-center justify-center font-bold text-slate-200">R</div>
-                  <span class="text-xs text-slate-400 block">Резистор / Нагрузка</span>
+                  <span class="text-xs text-slate-400 block">Резистор / Нагрузка[cite: 6]</span>
                 </div>
                 <div class="space-y-2">
                   <div class="flex items-center justify-center space-x-1 h-10">
                     <div class="w-0.5 h-8 bg-slate-300"></div>
                     <div class="w-0.5 h-4 bg-slate-300"></div>
                   </div>
-                  <span class="text-xs text-slate-400 block">Батарейка ($\mathcal{E}$)</span>
+                  <span class="text-xs text-slate-400 block">Батарейка ($\mathcal{E}$)[cite: 6]</span>
                 </div>
               </div>
             </div>
 
             <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-xs text-slate-300">
               <h4 class="font-bold text-sky-300 text-sm">Принцип идеализации:</h4>
-              <p>• <strong>Соединительные провода:</strong> считаются толстыми и медными, их сопротивлением пренебрегают ($R_{\text{пров}} \approx 0$).</p>
-              <p>• <strong>Элементы нагрузки:</strong> (лампочка, тонкий нихромовый провод) сосредоточивают в себе всё существенное сопротивление $R$.</p>
+              <p>• <strong>Соединительные провода:</strong> считаются толстыми и медными, их сопротивлением пренебрегают ($R_{\text{пров}} \approx 0$)[cite: 6].</p>
+              <p>• <strong>Элементы нагрузки:</strong> (лампочка, тонкий нихромовый провод) сосредоточивают в себе всё существенное сопротивление $R$[cite: 6].</p>
             </div>
 
           </div>
         </div>
       </section>
 
-      <!-- SECTION 7: POWER AND HEAT (EXAMPLE 1 FROM LECTURE) -->
+      <!-- SECTION 7: POWER AND HEAT -->
       <section id="section-power" class="space-y-6">
         <div class="flex items-center space-x-3 border-l-4 border-amber-500 pl-4">
           <h2 class="text-2xl font-bold text-white">7. Пример 1: Мощность и выделение тепла (Из лекции)</h2>
@@ -403,14 +413,14 @@
             <div>
               <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">Условия задачи</span>
               <p class="text-slate-200 text-sm font-semibold mt-1">
-                Дано: $\mathcal{E} = 6\text{ В}$, $R = 2\text{ Ом}$.
+                Дано: $\mathcal{E} = 6\text{ В}$, $R = 2\text{ Ом}$[cite: 7].
               </p>
               <p class="text-xs text-slate-400 mt-0.5">
-                Найдите мощность (количество тепловой энергии, выделяемой за единицу времени).
+                Найдите мощность (количество тепловой энергии, выделяемой за единицу времени)[cite: 7].
               </p>
             </div>
             <div class="bg-slate-900 px-4 py-2 rounded-xl border border-amber-500/30 text-amber-300 font-bold text-lg">
-              $P = 18\text{ Вт}$
+              $$P = 18\text{ Вт}$$
             </div>
           </div>
 
@@ -420,29 +430,29 @@
             <div class="grid grid-cols-1 gap-2.5">
               <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
                 <strong class="text-amber-400">1) Расчет тока через участок BC:</strong><br>
-                Применяем закон Ома: $I_{BC} = \frac{U_{BC}}{R_{BC}} = \frac{6\text{ В}}{2\text{ Ом}} = 3\text{ А}$.
+                Применяем закон Ома: $I_{BC} = \frac{U_{BC}}{R_{BC}} = \frac{6\text{ В}}{2\text{ Ом}} = 3\text{ А}$[cite: 7].
               </div>
 
               <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
                 <strong class="text-amber-400">2) Физический смысл тока:</strong><br>
-                Ток $3\text{ А}$ означает, что через участок $BC$ проходит <strong>3 Кулона в секунду</strong>.
+                Ток $3\text{ А}$ означает, что через участок $BC$ проходит <strong>3 Кулона в секунду</strong>[cite: 7].
               </div>
 
               <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
                 <strong class="text-amber-400">3) Физический смысл напряжения:</strong><br>
-                Напряжение на $BC$ равно $6\text{ В}$. Это значит, что над каждым Кулоном, проходящим через $BC$, совершается работа <strong>6 Дж</strong>.
+                Напряжение на $BC$ равно $6\text{ В}$. Это значит, что над каждым Кулоном, проходящим через $BC$, совершается работа <strong>6 Дж</strong>[cite: 7].
               </div>
 
               <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
                 <strong class="text-amber-400">4) Переход работы в тепло:</strong><br>
-                В проводнике вся работа электрических сил тратится на преодоление силы сопротивления. Значит: <br>
-                $$\text{Работа эл. силы} = \text{Работа силы сопротивления} = \text{Тепловая энергия}$$
+                В проводнике вся работа электрических сил тратится на преодоление силы сопротивления[cite: 7]. Значит: <br>
+                $$\text{Работа эл. силы} = \text{Работа силы сопротивления} = \text{Тепловая энергия}$$[cite: 7]
               </div>
 
               <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 leading-relaxed">
                 <strong class="text-amber-400">5) Итоговый расчет мощности:</strong><br>
-                От каждого Кулона мы получили $6\text{ Дж}$ тепла, а в секунду проходит $3\text{ Кл}$.<br>
-                Итого: $6\text{ Дж/Кл} \times 3\text{ Кл/с} = \mathbf{18\text{ Дж в секунду (или 18 Ватт мощности)}}$.
+                От каждого Кулона мы получили $6\text{ Дж}$ тепла, а в секунду проходит $3\text{ Кл}$[cite: 7].<br>
+                Итого: $6\text{ Дж/Кл} \times 3\text{ Кл/с} = \mathbf{18\text{ Дж в секунду (или 18 Ватт мощности)}}$[cite: 7].
               </div>
             </div>
           </div>
@@ -451,14 +461,14 @@
           <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center space-y-2">
             <span class="text-xs text-slate-400 block">Общие формулы мощности электрического тока</span>
             <div class="text-lg font-bold text-amber-300 font-mono">
-              $P = I \cdot U = I^2 \cdot R = \frac{U^2}{R}$
+              $$P = I \cdot U = I^2 \cdot R = \frac{U^2}{R}$$
             </div>
-            <p class="text-xs text-slate-500">Единица измерения: Ватт (Вт) = Дж/с</p>
+            <p class="text-xs text-slate-500">Единица измерения: Ватт (Вт) = Дж/с[cite: 7]</p>
           </div>
         </div>
       </section>
 
-      <!-- SECTION 8: INTERACTIVE CALCULATOR -->
+      <!-- SECTION 8: INTERACTIVE CALCULATORS -->
       <section id="section-calculators" class="space-y-6 pt-6 border-t border-slate-800">
         <div class="flex items-center space-x-3">
           <h2 class="text-xl font-bold text-white">Интерактивные калькуляторы</h2>
@@ -468,7 +478,7 @@
           
           <!-- Ohm's Law Calc -->
           <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
-            <h3 class="text-base font-bold text-brand-400">Калькулятор Закона Ома ($I = U / R$)</h3>
+            <h3 class="text-base font-bold text-brand-400">Калькулятор Закона Ома ($I = U / R$)[cite: 1]</h3>
             <div class="space-y-3 text-xs">
               <div>
                 <label class="text-slate-400 block mb-1">Напряжение $U$ (В):</label>
@@ -487,7 +497,7 @@
 
           <!-- Power Calc -->
           <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
-            <h3 class="text-base font-bold text-amber-400">Калькулятор Мощности и Тепла ($P = U^2 / R$)</h3>
+            <h3 class="text-base font-bold text-amber-400">Калькулятор Мощности ($P = U^2 / R$)[cite: 7]</h3>
             <div class="space-y-3 text-xs">
               <div>
                 <label class="text-slate-400 block mb-1">Напряжение $U$ (В):</label>
@@ -498,7 +508,7 @@
                 <input type="number" id="calcPowerR" value="2" oninput="app.calcPower()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
               </div>
               <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-center mt-3">
-                <span class="text-slate-400 block text-xs">Мощность $P$ (Выделяемое тепло в сек):</span>
+                <span class="text-slate-400 block text-xs">Мощность $P$ (Тепло в сек):</span>
                 <span id="resP" class="text-lg font-bold text-amber-300">18 Вт (Дж/с)</span>
               </div>
             </div>
@@ -534,10 +544,13 @@
           document.getElementById('homeBtn').classList.remove('hidden');
           window.scrollTo({ top: 0, behavior: 'smooth' });
 
-          // Trigger KaTeX rendering if needed
-          if (window.renderMathInElement) {
-            renderMathInElement(document.getElementById('viewElectricity'));
-          }
+          this.retypeset();
+        }
+      },
+
+      retypeset() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          window.MathJax.typesetPromise();
         }
       },
 
@@ -579,6 +592,10 @@
         res.textContent = p.toFixed(2) + ' Вт (Дж/с)';
       }
     };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      app.retypeset();
+    });
   </script>
 </body>
 </html>
