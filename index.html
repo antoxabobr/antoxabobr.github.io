@@ -1,601 +1,153 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Конспект по физике: Электричество</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-              800: '#075985',
-              900: '#0c4a6e',
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- MathJax Configuration & Engine -->
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      },
-      options: {
-        ignoreHtmlClass: 'tex2jax_ignore',
-        processHtmlClass: 'tex2jax_process'
-      }
-    };
-  </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-
-  <style>
-    .glass {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .light .glass {
-      background: rgba(255, 255, 255, 0.85);
-    }
-    html {
-      scroll-behavior: smooth;
-    }
-  </style>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200 antialiased selection:bg-brand-500 selection:text-white">
-
-  <!-- TOP NAVIGATION BAR -->
-  <header class="sticky top-0 z-50 glass border-b border-slate-800 dark:border-slate-800 border-slate-200 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showHome()">
-        <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-bold text-white shadow-lg shadow-brand-500/30">
-          $\mathbf{E}$
-        </div>
-        <div>
-          <span class="font-bold text-lg tracking-tight block">Физика Конспекты</span>
-          <span class="text-xs text-slate-400 block -mt-1">Лекции и теории</span>
-        </div>
-      </div>
-
-      <!-- Quick Section Jump Links -->
-      <nav id="sectionNav" class="hidden md:flex items-center space-x-1 text-sm font-medium text-slate-300">
-        <a href="#section-charge" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Заряд и Ток</a>
-        <a href="#section-voltage" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Напряжение</a>
-        <a href="#section-derivation" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Вывод Ома</a>
-        <a href="#section-ohms-law" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Закон Ома</a>
-        <a href="#section-emf" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">ЭДС и $r$</a>
-        <a href="#section-schematics" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Схемы</a>
-        <a href="#section-power" class="px-3 py-1.5 rounded-lg hover:bg-slate-800 hover:text-white transition">Мощность</a>
-      </nav>
-
-      <!-- Theme Switcher & Back Home -->
-      <div class="flex items-center space-x-2">
-        <button id="homeBtn" onclick="app.showHome()" class="hidden text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition border border-slate-700">
-          ← К темам
-        </button>
-        <button onclick="app.toggleTheme()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700" title="Переключить тему">
-          <span id="themeIcon">☀️</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-    <!-- HOME / TOPIC SELECTION VIEW -->
-    <div id="viewHome" class="space-y-8">
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Выберите тему конспекта
-        </h1>
-        <p class="text-slate-400 text-base">
-          Интерактивные конспекты, точные формулы, микроскопические выводы и практические расчеты строго по лекциям.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-        
-        <!-- CARD 1: ELECTRICITY -->
-        <div onclick="app.openTopic('electricity')" 
-             class="group relative bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 hover:border-brand-500 rounded-2xl p-6 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-brand-500/10 flex flex-col justify-between">
-          <div>
-            <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-xl mb-4 group-hover:scale-110 transition-transform">
-              ⚡
-            </div>
-            <h2 class="text-xl font-bold text-white mb-2 group-hover:text-brand-400 transition-colors">
-              Электрический ток и Закон Ома
-            </h2>
-            <p class="text-slate-400 text-sm leading-relaxed mb-4">
-              Заряд, дрейф электронов $I = vSnq$, вывод закона Ома из гипотезы Друде $F_{\text{сопр}}=kv$, ЭДС, схемы и пример расчета мощности.
-            </p>
-          </div>
-          <div class="flex items-center text-xs font-semibold text-brand-400 group-hover:translate-x-1 transition-transform">
-            Открыть конспект →
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TOPIC VIEW: ELECTRICITY -->
-    <div id="viewElectricity" class="hidden space-y-12">
-      
-      <!-- TOPIC HEADER -->
-      <div class="border-b border-slate-800 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div class="inline-flex items-center space-x-2 text-xs font-medium text-brand-400 bg-brand-500/10 px-2.5 py-1 rounded-full border border-brand-500/20 mb-2">
-            <span>Раздел 1</span>
-            <span>•</span>
-            <span>Полный курс лекций</span>
-          </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
-            Электрический ток, напряжение и Закон Ома
-          </h1>
-        </div>
-      </div>
-
-      <!-- SECTION 1: CHARGE & CURRENT -->
-      <section id="section-charge" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-brand-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">1. Электрический заряд и сила тока</h2>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          <!-- Charge -->
-          <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
-            <h3 class="text-lg font-bold text-brand-400 flex items-center space-x-2">
-              <span>Электрический заряд</span>
-            </h3>
-            <p class="text-slate-300 text-sm leading-relaxed">
-              Количество электрического заряда измеряется в <strong>кулонах (Кл)</strong>[cite: 1]. Заряд одного электрона равен по модулю[cite: 1]:
-            </p>
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center text-lg font-mono text-brand-300">
-              $$|e| = 1{,}6 \cdot 10^{-19} \text{ Кл}$$
-            </div>
-            <p class="text-xs text-slate-400">Электрон обладает отрицательным зарядом: $e = -1{,}6 \cdot 10^{-19} \text{ Кл}$[cite: 1].</p>
-          </div>
-
-          <!-- Current -->
-          <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
-            <h3 class="text-lg font-bold text-brand-400">Сила тока (Макроопределение)</h3>
-            <p class="text-slate-300 text-sm leading-relaxed">
-              <strong>Сила тока</strong> — это количество электрического заряда, проходящего через поперечное сечение проводника за единицу времени[cite: 1].
-            </p>
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center text-lg font-mono text-emerald-400">
-              $$I = \frac{Q}{t}$$
-            </div>
-            <div class="text-xs text-slate-400 space-y-1">
-              <p>• $I$ — сила тока в <strong>амперах (А)</strong>[cite: 1]</p>
-              <p>• $Q$ — заряд в <strong>кулонах (Кл)</strong>[cite: 1]</p>
-              <p>• $t$ — время в <strong>секундах (с)</strong>[cite: 1]</p>
-              <p class="pt-1 font-semibold text-slate-300">Определение: $1\text{ А} = \frac{1\text{ Кл}}{1\text{ с}}$[cite: 1]. Измеряется амперметром (последовательно)[cite: 1].</p>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Microscopic Current Model -->
-        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
-          <h3 class="text-lg font-bold text-amber-400">Микроскопическая модель тока (Из лекции)</h3>
-          <p class="text-slate-300 text-sm leading-relaxed">
-            Пусть электроны бегут по проводу со скоростью $v$. Заряд каждого электрона равен $q$. Концентрация электронов в материале равна $n$ (количество на единицу объема)[cite: 2].
-          </p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-            <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2">
-              <p class="text-xs text-slate-400">За время $t$ из сечения высунется столбик электронов длиной $vt$ и объемом $v t S$ (где $S$ — площадь сечения)[cite: 2].</p>
-              <p class="text-xs text-slate-400">За время $t$ сквозь сечение пройдет заряд: $Q = v t S n q$[cite: 2].</p>
-              <div class="text-center text-xl font-bold text-amber-300 pt-2 border-t border-slate-800">
-                $$I = v S n q$$
-              </div>
-            </div>
-            <div class="text-xs text-slate-400 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 leading-relaxed">
-              <p class="font-semibold text-slate-200 mb-1">Компоненты формулы:</p>
-              <p>• $v$ — скорость направленного движения (дрейфа)[cite: 2]</p>
-              <p>• $S$ — площадь поперечного сечения проводника[cite: 2]</p>
-              <p>• $n$ — концентрация свободных носителей заряда[cite: 2]</p>
-              <p>• $q$ — заряд одной частицы (электрона)[cite: 2]</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 2: VOLTAGE -->
-      <section id="section-voltage" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-brand-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">2. Электрическое напряжение</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
-          <p class="text-slate-300 text-sm leading-relaxed">
-            При движении электронов от точки A к точке B электрическая сила совершает работу[cite: 1]. <strong>Напряжение ($U$)</strong> — это работа электрической силы, приходящаяся на единицу электрического заряда, прошедшего через участок цепи[cite: 1].
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
-              <div class="text-xs text-slate-400 mb-1">Основная формула</div>
-              <div class="text-xl font-bold text-brand-300">$$U = \frac{A}{Q}$$</div>
-              <div class="text-xs text-slate-500 mt-1">$1\text{ В} = \frac{1\text{ Дж}}{1\text{ Кл}}$[cite: 1]</div>
-            </div>
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
-              <div class="text-xs text-slate-400 mb-1">Выражение через $I$ и $t$</div>
-              <div class="text-xl font-bold text-brand-300">$$U = \frac{A}{I \cdot t}$$</div>
-              <div class="text-xs text-slate-500 mt-1">так как $Q = I \cdot t$[cite: 1]</div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800/80 text-sm space-y-2">
-            <p class="font-semibold text-brand-400">Как наглядно понимать напряжение?</p>
-            <p class="text-slate-300 text-xs leading-relaxed">
-              Напряжение показывает, сколько энергии передается каждому кулону заряда при перемещении между двумя точками[cite: 1].
-            </p>
-            <p class="text-slate-400 text-xs italic">
-              Например: Если напряжение равно $5\text{ В}$, электрическая сила совершает работу $5\text{ Дж}$ на каждый $1\text{ Кл}$ прошедшего заряда[cite: 1]. Измеряется вольтметром (параллельно)[cite: 1].
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 3: DERIVATION OF OHM'S LAW -->
-      <section id="section-derivation" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-purple-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">3. Теоретический вывод закона Ома (Из лекции)</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-6">
-          <div class="bg-purple-950/30 border border-purple-800/50 p-4 rounded-xl">
-            <h3 class="font-bold text-purple-300 text-sm mb-1">Гипотеза:</h3>
-            <p class="text-slate-300 text-xs leading-relaxed">
-              Сила сопротивления движению электронов пропорциональна их скорости: <strong class="text-purple-200">$F_{\text{сопр}} = k \cdot v$</strong> (где $k$ — коэффициент сопротивления среды)[cite: 2, 4].
-            </p>
-          </div>
-
-          <div class="space-y-4">
-            <h4 class="text-sm font-bold text-slate-200">Шаги математического вывода:</h4>
-            
-            <div class="grid grid-cols-1 gap-3 text-xs">
-              <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span class="text-purple-400 font-bold">1. Связь силы поля и напряжения:</span>
-                <p class="text-slate-300">$$U = \frac{F_{\text{электр}} \cdot L}{q} \implies F_{\text{электр}} = \frac{U \cdot q}{L}$$[cite: 4]</p>
-              </div>
-
-              <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span class="text-purple-400 font-bold">2. Установившаяся скорость (баланс сил):</span>
-                <p class="text-slate-300">$$F_{\text{сопр}} = F_{\text{электр}} \implies k \cdot v = \frac{U \cdot q}{L} \implies v = \frac{U \cdot q}{L \cdot k}$$[cite: 4]</p>
-              </div>
-
-              <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                <span class="text-purple-400 font-bold">3. Подстановка в микроскопический ток $I = v S n q$:</span>
-                <p class="text-slate-300">$$I = \left( \frac{U \cdot q}{L \cdot k} \right) \cdot S \cdot n \cdot q = U \cdot \frac{S}{L} \cdot \frac{n q^2}{k}$$[cite: 4]</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-purple-500/30 text-center space-y-2">
-            <p class="text-xs text-slate-400">Обозначили сопротивление как $\frac{1}{R}$, тогда:[cite: 4]</p>
-            <div class="text-xl font-bold text-purple-300">$$I = \frac{U}{R}$$</div>
-            <p class="text-xs text-slate-400 pt-2 border-t border-slate-800">
-              Где удельное сопротивление: <strong class="text-purple-300">$\rho = \frac{k}{n q^2}$</strong>[cite: 4], а сопротивление провода: <strong class="text-purple-300">$R = \rho \cdot \frac{L}{S}$</strong>[cite: 1, 3, 4].
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 4: OHM'S LAW -->
-      <section id="section-ohms-law" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-brand-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">4. Закон Ома для участка цепи</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
-          <div class="bg-slate-900/90 p-4 rounded-xl border-l-4 border-brand-500 space-y-1">
-            <span class="text-xs font-bold text-brand-400 uppercase tracking-wider">Формулировка из лекции</span>
-            <p class="text-slate-200 text-sm leading-relaxed font-medium">
-              «Для ЛЮБОГО участка провода, по которому идёт ток, верно следующее: сила тока, текущего через ЭТОТ кусок, равна напряжению на концах ЭТОГО куска, делить на сопротивление ЭТОГО куска.»[cite: 5]
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-              <div class="text-xs text-slate-400 mb-1">Сила тока</div>
-              <div class="text-lg font-bold text-brand-300">$$I = \frac{U}{R}$$</div>
-            </div>
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-              <div class="text-xs text-slate-400 mb-1">Напряжение</div>
-              <div class="text-lg font-bold text-brand-300">$$U = I \cdot R$$</div>
-            </div>
-            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-              <div class="text-xs text-slate-400 mb-1">Сопротивление</div>
-              <div class="text-lg font-bold text-brand-300">$$R = \frac{U}{I}$$</div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
-            <h4 class="font-bold text-slate-200 text-sm">Геометрическая зависимость сопротивления:</h4>
-            <div class="text-center font-mono text-base text-emerald-400 my-2">$$R = \rho \cdot \frac{L}{S}$$</div>
-            <p class="text-slate-400">• Чем длиннее проводник ($L$), тем больше его сопротивление[cite: 1].</p>
-            <p class="text-slate-400">• Чем больше площадь сечения ($S$), тем меньше сопротивление[cite: 1].</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 5: EMF AND INTERNAL RESISTANCE -->
-      <section id="section-emf" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-emerald-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">5. ЭДС и внутреннее сопротивление источников</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-4">
-          <p class="text-slate-300 text-sm leading-relaxed">
-            Любой источник тока характеризуется тем, какую работу он может совершить над единицей заряда[cite: 5]. Такую величину называют <strong>электродвижущей силой (ЭДС, $\mathcal{E}$)</strong>[cite: 5].
-          </p>
-
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-sm space-y-2">
-            <p class="font-bold text-emerald-400">Пример с батарейкой на 6 Вольт:</p>
-            <p class="text-slate-300 text-xs leading-relaxed">
-              На батарейке написано: <strong class="text-white">6 В</strong>[cite: 5]. Это значит, что если соединить "+" и "-" этой батарейки любым проводом, то на концах этого провода создастся напряжение около $6\text{ В}$[cite: 5].
-            </p>
-            <p class="text-slate-400 text-xs italic">
-              Почему «почти»? У любой батарейки есть внутреннее сопротивление ($r$)[cite: 5]. Малая часть работы источника тратится на преодоление внутреннего сопротивления, поэтому напряжение на концах провода $U$ немного меньше ЭДС[cite: 5]:
-            </p>
-            <div class="text-center font-bold text-emerald-300 text-lg py-1">
-              $$U = \mathcal{E} - I \cdot r$$
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 6: SCHEMATICS AND IDEALIZATION -->
-      <section id="section-schematics" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-sky-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">6. Обозначения и идеализация схем</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-6">
-          <p class="text-slate-300 text-sm leading-relaxed">
-            На электрических схемах реальные физические элементы заменяются их идеализированными обозначениями[cite: 6]:
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            
-            <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 space-y-4 text-center">
-              <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block">Условные обозначения</span>
-              <div class="flex justify-around items-center py-4">
-                <div class="space-y-2">
-                  <div class="w-16 h-10 border-2 border-slate-300 mx-auto flex items-center justify-center font-bold text-slate-200">R</div>
-                  <span class="text-xs text-slate-400 block">Резистор / Нагрузка[cite: 6]</span>
-                </div>
-                <div class="space-y-2">
-                  <div class="flex items-center justify-center space-x-1 h-10">
-                    <div class="w-0.5 h-8 bg-slate-300"></div>
-                    <div class="w-0.5 h-4 bg-slate-300"></div>
-                  </div>
-                  <span class="text-xs text-slate-400 block">Батарейка ($\mathcal{E}$)[cite: 6]</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-xs text-slate-300">
-              <h4 class="font-bold text-sky-300 text-sm">Принцип идеализации:</h4>
-              <p>• <strong>Соединительные провода:</strong> считаются толстыми и медными, их сопротивлением пренебрегают ($R_{\text{пров}} \approx 0$)[cite: 6].</p>
-              <p>• <strong>Элементы нагрузки:</strong> (лампочка, тонкий нихромовый провод) сосредоточивают в себе всё существенное сопротивление $R$[cite: 6].</p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 7: POWER AND HEAT -->
-      <section id="section-power" class="space-y-6">
-        <div class="flex items-center space-x-3 border-l-4 border-amber-500 pl-4">
-          <h2 class="text-2xl font-bold text-white">7. Пример 1: Мощность и выделение тепла (Из лекции)</h2>
-        </div>
-
-        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 space-y-6">
-          <div class="bg-amber-950/30 border border-amber-800/50 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">Условия задачи</span>
-              <p class="text-slate-200 text-sm font-semibold mt-1">
-                Дано: $\mathcal{E} = 6\text{ В}$, $R = 2\text{ Ом}$[cite: 7].
-              </p>
-              <p class="text-xs text-slate-400 mt-0.5">
-                Найдите мощность (количество тепловой энергии, выделяемой за единицу времени)[cite: 7].
-              </p>
-            </div>
-            <div class="bg-slate-900 px-4 py-2 rounded-xl border border-amber-500/30 text-amber-300 font-bold text-lg">
-              $$P = 18\text{ Вт}$$
-            </div>
-          </div>
-
-          <div class="space-y-3 text-xs text-slate-300">
-            <h4 class="font-bold text-slate-200 text-sm">Пошаговое физическое объяснение:</h4>
-            
-            <div class="grid grid-cols-1 gap-2.5">
-              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                <strong class="text-amber-400">1) Расчет тока через участок BC:</strong><br>
-                Применяем закон Ома: $I_{BC} = \frac{U_{BC}}{R_{BC}} = \frac{6\text{ В}}{2\text{ Ом}} = 3\text{ А}$[cite: 7].
-              </div>
-
-              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                <strong class="text-amber-400">2) Физический смысл тока:</strong><br>
-                Ток $3\text{ А}$ означает, что через участок $BC$ проходит <strong>3 Кулона в секунду</strong>[cite: 7].
-              </div>
-
-              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                <strong class="text-amber-400">3) Физический смысл напряжения:</strong><br>
-                Напряжение на $BC$ равно $6\text{ В}$. Это значит, что над каждым Кулоном, проходящим через $BC$, совершается работа <strong>6 Дж</strong>[cite: 7].
-              </div>
-
-              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-                <strong class="text-amber-400">4) Переход работы в тепло:</strong><br>
-                В проводнике вся работа электрических сил тратится на преодоление силы сопротивления[cite: 7]. Значит: <br>
-                $$\text{Работа эл. силы} = \text{Работа силы сопротивления} = \text{Тепловая энергия}$$[cite: 7]
-              </div>
-
-              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 leading-relaxed">
-                <strong class="text-amber-400">5) Итоговый расчет мощности:</strong><br>
-                От каждого Кулона мы получили $6\text{ Дж}$ тепла, а в секунду проходит $3\text{ Кл}$[cite: 7].<br>
-                Итого: $6\text{ Дж/Кл} \times 3\text{ Кл/с} = \mathbf{18\text{ Дж в секунду (или 18 Ватт мощности)}}$[cite: 7].
-              </div>
-            </div>
-          </div>
-
-          <!-- Formula Summary Block -->
-          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-center space-y-2">
-            <span class="text-xs text-slate-400 block">Общие формулы мощности электрического тока</span>
-            <div class="text-lg font-bold text-amber-300 font-mono">
-              $$P = I \cdot U = I^2 \cdot R = \frac{U^2}{R}$$
-            </div>
-            <p class="text-xs text-slate-500">Единица измерения: Ватт (Вт) = Дж/с[cite: 7]</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- SECTION 8: INTERACTIVE CALCULATORS -->
-      <section id="section-calculators" class="space-y-6 pt-6 border-t border-slate-800">
-        <div class="flex items-center space-x-3">
-          <h2 class="text-xl font-bold text-white">Интерактивные калькуляторы</h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <!-- Ohm's Law Calc -->
-          <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
-            <h3 class="text-base font-bold text-brand-400">Калькулятор Закона Ома ($I = U / R$)[cite: 1]</h3>
-            <div class="space-y-3 text-xs">
-              <div>
-                <label class="text-slate-400 block mb-1">Напряжение $U$ (В):</label>
-                <input type="number" id="calcU" value="6" oninput="app.calcOhm()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500">
-              </div>
-              <div>
-                <label class="text-slate-400 block mb-1">Сопротивление $R$ (Ом):</label>
-                <input type="number" id="calcR" value="2" oninput="app.calcOhm()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-500">
-              </div>
-              <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-center mt-3">
-                <span class="text-slate-400 block text-xs">Сила тока $I$:</span>
-                <span id="resI" class="text-lg font-bold text-brand-300">3 А</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Power Calc -->
-          <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
-            <h3 class="text-base font-bold text-amber-400">Калькулятор Мощности ($P = U^2 / R$)[cite: 7]</h3>
-            <div class="space-y-3 text-xs">
-              <div>
-                <label class="text-slate-400 block mb-1">Напряжение $U$ (В):</label>
-                <input type="number" id="calcPowerU" value="6" oninput="app.calcPower()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
-              </div>
-              <div>
-                <label class="text-slate-400 block mb-1">Сопротивление $R$ (Ом):</label>
-                <input type="number" id="calcPowerR" value="2" oninput="app.calcPower()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
-              </div>
-              <div class="bg-slate-900/90 p-3 rounded-lg border border-slate-800 text-center mt-3">
-                <span class="text-slate-400 block text-xs">Мощность $P$ (Тепло в сек):</span>
-                <span id="resP" class="text-lg font-bold text-amber-300">18 Вт (Дж/с)</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-    </div>
-
-  </main>
-
-  <!-- APPLICATION LOGIC -->
-  <script>
-    const app = {
-      currentView: 'home',
-
-      showHome() {
-        this.currentView = 'home';
-        document.getElementById('viewHome').classList.remove('hidden');
-        document.getElementById('viewElectricity').classList.add('hidden');
-        document.getElementById('sectionNav').classList.add('hidden');
-        document.getElementById('homeBtn').classList.add('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      },
-
-      openTopic(topicId) {
-        if (topicId === 'electricity') {
-          this.currentView = 'electricity';
-          document.getElementById('viewHome').classList.add('hidden');
-          document.getElementById('viewElectricity').classList.remove('hidden');
-          document.getElementById('sectionNav').classList.remove('hidden');
-          document.getElementById('homeBtn').classList.remove('hidden');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-
-          this.retypeset();
-        }
-      },
-
-      retypeset() {
-        if (window.MathJax && window.MathJax.typesetPromise) {
-          window.MathJax.typesetPromise();
-        }
-      },
-
-      toggleTheme() {
-        const html = document.documentElement;
-        const icon = document.getElementById('themeIcon');
-        if (html.classList.contains('dark')) {
-          html.classList.remove('dark');
-          html.classList.add('light');
-          icon.textContent = '🌙';
-        } else {
-          html.classList.remove('light');
-          html.classList.add('dark');
-          icon.textContent = '☀️';
-        }
-      },
-
-      calcOhm() {
-        const u = parseFloat(document.getElementById('calcU').value) || 0;
-        const r = parseFloat(document.getElementById('calcR').value) || 0;
-        const res = document.getElementById('resI');
-        if (r <= 0) {
-          res.textContent = 'Ошибка (R > 0)';
-          return;
-        }
-        const i = u / r;
-        res.textContent = i.toFixed(2) + ' А';
-      },
-
-      calcPower() {
-        const u = parseFloat(document.getElementById('calcPowerU').value) || 0;
-        const r = parseFloat(document.getElementById('calcPowerR').value) || 0;
-        const res = document.getElementById('resP');
-        if (r <= 0) {
-          res.textContent = 'Ошибка (R > 0)';
-          return;
-        }
-        const p = (u * u) / r;
-        res.textContent = p.toFixed(2) + ' Вт (Дж/с)';
-      }
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-      app.retypeset();
-    });
-  </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cock Fights</title>
+<style>
+:root{--bg:#12041f;--fg:#fff3d6;--btn:#3a1160;--btn2:#ff3d81;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#fff3d6;--fg:#2a1030;--btn:#ffd27a;--btn2:#ff3d81;color-scheme:light}}
+:root[data-theme="light"]{--bg:#fff3d6;--fg:#2a1030;--btn:#ffd27a;--btn2:#ff3d81}
+:root[data-theme="dark"]{--bg:#12041f;--fg:#fff3d6;--btn:#3a1160;--btn2:#ff3d81}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Impact,"Arial Black",sans-serif;-webkit-user-select:none;user-select:none}
+main{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px}
+canvas{width:min(100%,calc((100vh - 24px)*16/9));height:auto;border-radius:14px;box-shadow:0 0 30px #ff3d81aa,0 0 60px #7a2cff88;touch-action:none;background:#000}
+.pad{display:none;width:100%;max-width:800px;justify-content:space-between;gap:10px}
+@media (pointer:coarse){.pad{display:flex}}
+.grp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex:1}
+.grp b{grid-column:1/4;text-align:center;font-size:13px;letter-spacing:2px}
+.grp button{font:inherit;font-size:15px;padding:14px 0;border:2px solid var(--btn2);background:var(--btn);color:var(--fg);border-radius:10px;touch-action:none}
+.grp button:active{background:var(--btn2)}
+</style></head><body>
+<main><canvas id="c" width="800" height="450"></canvas><div class="pad" id="pad"></div></main>
+<script>
+const cv=document.getElementById('c'),g=cv.getContext('2d'),W=800,H=450,GY=380;
+const K1={l:'KeyA',r:'KeyD',u:'KeyW',b:'KeyS',a:'KeyF',s:'KeyG'},K2={l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',b:'ArrowDown',a:'KeyK',s:'KeyL'};
+const keys={},pressed={};
+const press=c=>pressed[c]=performance.now();
+const pr=c=>{const v=pressed[c]&&performance.now()-pressed[c]<130;pressed[c]=0;return v};
+addEventListener('keydown',e=>{if(e.code.startsWith('Arrow')||e.code=='Space')e.preventDefault();if(!keys[e.code])press(e.code);keys[e.code]=1;ia()});
+addEventListener('keyup',e=>keys[e.code]=0);
+cv.addEventListener('pointerdown',()=>{ia();press('Enter')});
+// touch pad
+const pad=document.getElementById('pad');
+[['P1',K1],['P2',K2]].forEach(([n,K])=>{const d=document.createElement('div');d.className='grp';d.innerHTML='<b>'+n+'</b>';
+[['◀','l'],['▲','u'],['▶','r'],['SHIELD','b'],['PECK','a'],['SPUR','s']].forEach(([t,k])=>{const b=document.createElement('button');b.textContent=t;const code=K[k];
+b.addEventListener('pointerdown',e=>{e.preventDefault();ia();press(code);keys[code]=1});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[code]=0));d.appendChild(b)});pad.appendChild(d)});
+// audio
+let ac;function ia(){if(!ac)try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function tone(f,d,ty='square',v=.08,sl=0){if(!ac)return;const t=ac.currentTime,o=ac.createOscillator(),q=ac.createGain();o.type=ty;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,f+sl),t+d);q.gain.setValueAtTime(v,t);q.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(q);q.connect(ac.destination);o.start();o.stop(t+d)}
+// data
+const C1={body:'#ff6a00',light:'#ffc14d',dark:'#c23b00',tail:['#00e5a0','#2f7bff','#a64dff','#00e5a0','#2f7bff'],band:'#ffe600'};
+const C2={body:'#2a5cff',light:'#8fd8ff',dark:'#14207f',tail:['#ff3d81','#ffe600','#ff8a00','#ff3d81','#ffe600'],band:'#00ffd0'};
+const AT={peck:{dur:.3,s:.08,e:.17,rng:78,dmg:7,stun:.28,kb:180},spur:{dur:.5,s:.16,e:.27,rng:102,dmg:13,stun:.45,kb:360}};
+const mk=(x,d,c,k,n)=>({x,y:GY,vx:0,vy:0,hp:100,lag:100,dir:d,c,k,n,at:null,stun:0,blk:false,ko:false,wins:0,flash:0,bob:0});
+let P1=mk(250,1,C1,K1,'RUSTY'),P2=mk(550,-1,C2,K2,'BIG BLUE');
+let st='title',stT=0,round=1,time=60,hitstop=0,shake=0,parts=[],fx=false,endMsg='',clock=0;
+function reset(){[[P1,210,1],[P2,590,-1]].forEach(([f,x,d])=>{Object.assign(f,{x,y:GY,vx:0,vy:0,hp:100,lag:100,dir:d,at:null,stun:0,blk:false,ko:false,flash:0});});st='intro';stT=0;time=60;parts=[];fx=false}
+function newMatch(){P1.wins=P2.wins=0;round=1;reset()}
+// fighting
+function upd(f,o,dt){
+ const k=f.k,gr=f.y>=GY;f.stun=Math.max(0,f.stun-dt);f.flash=Math.max(0,f.flash-dt);
+ const free=!f.ko&&f.stun<=0&&!f.at;f.blk=free&&gr&&!!keys[k.b];
+ if(free&&!f.blk&&gr){f.vx=((keys[k.r]?1:0)-(keys[k.l]?1:0))*240;if(keys[k.u]){f.vy=-650;tone(300,.15,'square',.05,300)}}
+ else if(gr)f.vx*=f.at?.8:.85;
+ if(free&&!f.blk){const t=pr(k.a)?'peck':pr(k.s)?'spur':null;if(t){f.at={type:t,t:0,hit:false,...AT[t]};tone(480+Math.random()*250,.09,'sawtooth',.05,300)}}
+ if(f.at){const a=f.at;a.t+=dt;if(a.t>=a.dur)f.at=null;else if(!a.hit&&a.t>=a.s&&a.t<=a.e){const dx=(o.x-f.x)*f.dir;if(dx>0&&dx<a.rng+22&&Math.abs(o.y-f.y)<75&&!o.ko)hit(f,o,a)}}
+ if(free||f.ko===false&&f.stun<=0&&f.at)f.dir=o.x>f.x?1:-1;
+ f.vy+=1800*dt;f.y+=f.vy*dt;if(f.y>=GY){f.y=GY;f.vy=0}
+ f.x+=f.vx*dt;f.x=Math.max(50,Math.min(750,f.x));f.bob+=Math.abs(f.vx)*dt*.06;
+ f.lag+=(f.hp-f.lag)*Math.min(1,dt*2);
+}
+function hit(f,o,a){a.hit=true;const x=o.x-f.dir*20,y=o.y-70;
+ if(o.blk){o.hp-=a.dmg*.12;o.vx=f.dir*a.kb*.6;f.vx=-f.dir*120;spark(x+f.dir*30,y,'#7ff6ff',8);pop('BLOCK',x,y-20,'#7ff6ff');tone(700,.08,'square',.08,-300);shake=3;return}
+ o.hp-=a.dmg;o.stun=a.stun;o.at=null;o.vx=f.dir*a.kb;o.flash=.15;if(a.type=='spur')o.vy=-330;
+ spark(x,y,'#ffe600',12);for(let i=0;i<7;i++)parts.push({t:'f',x,y,vx:(Math.random()-.3)*300*f.dir,vy:-Math.random()*300,r:Math.random()*6,l:1.1,c:o.c.body});
+ pop(['POW!','BAM!','BAWK!','CRACK!'][Math.random()*4|0],x,y-20,'#ffe600');
+ hitstop=a.type=='spur'?.09:.05;shake=a.type=='spur'?10:6;tone(170,.15,'square',.12,-100);tone(900,.05,'sawtooth',.06,-400);
+ if(o.hp<=0){o.hp=0;o.ko=true;o.vx=f.dir*420;o.vy=-450;shake=16}}
+function spark(x,y,c,n){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=150+Math.random()*250;parts.push({t:'s',x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:.3,c})}}
+function pop(s,x,y,c){parts.push({t:'t',s,x,y,vx:0,vy:-70,l:.7,c})}
+function step(dt){
+ stT+=dt;clock+=dt;shake=Math.max(0,shake-dt*40);
+ for(const p of parts){p.l-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.t!='t')p.vy+=(p.t=='f'?500:900)*dt;if(p.t=='f'){p.vx*=.98;p.r+=dt*6}}
+ parts=parts.filter(p=>p.l>0);
+ if(st=='title'){P1.x=250;P2.x=550;P1.dir=1;P2.dir=-1;P1.hp=P2.hp=100;const a=stT%3,b=(stT+1.5)%3;P1.at=a<.5?{type:'spur',t:a,dur:.5}:null;P2.at=b<.3?{type:'peck',t:b,dur:.3}:null;if(pr('Enter')||pr('Space'))newMatch()}
+ else if(st=='intro'){if(stT>1.3&&!fx){fx=true;tone(300,.35,'square',.1,500)}if(stT>2.1){st='fight';stT=0}}
+ else if(st=='fight'){
+  if(hitstop>0)hitstop-=dt;else{time-=dt;upd(P1,P2,dt);upd(P2,P1,dt);const d=P2.x-P1.x;if(Math.abs(d)<48&&Math.abs(P1.y-P2.y)<50){const s=d>=0?1:-1,m=(48-Math.abs(d))/2;P1.x-=s*m;P2.x+=s*m}}
+  if(P1.ko||P2.ko||time<=0){let w;if(P1.ko)w=P2;else if(P2.ko)w=P1;else w=P1.hp>P2.hp?P1:P2.hp>P1.hp?P2:null;
+   endMsg=(P1.ko||P2.ko)?'K.O.!':'TIME!';if(w)w.wins++;else{P1.wins++;P2.wins++}endMsg+='|'+(w?w.n+' TAKES IT':'DRAW');st='ko';stT=0;tone(400,.9,'sawtooth',.1,-350)}}
+ else if(st=='ko'){const s=dt*.5;upd(P1,P2,s);upd(P2,P1,s);if(stT>3){if(P1.wins>=2||P2.wins>=2){st='over';stT=0}else{round++;reset()}}}
+ else if(st=='over'){if(stT>.8&&(pr('Enter')||pr('Space')))newMatch()}
+}
+// drawing
+const bg=document.createElement('canvas');bg.width=W;bg.height=H;
+(function(){const c=bg.getContext('2d');let s=7;const rnd=()=>(s=(s*9301+49297)%233280)/233280;
+ let gr=c.createLinearGradient(0,0,0,GY);gr.addColorStop(0,'#1a0533');gr.addColorStop(.6,'#7a1fa8');gr.addColorStop(1,'#ff3d81');c.fillStyle=gr;c.fillRect(0,0,W,H);
+ gr=c.createLinearGradient(0,130,0,300);gr.addColorStop(0,'#ffe600');gr.addColorStop(1,'#ff3d81');c.fillStyle=gr;c.beginPath();c.arc(400,230,95,0,7);c.fill();
+ c.fillStyle='#7a1fa8';for(let i=0;i<6;i++)c.fillRect(300,225+i*14,200,2+i*1.6);
+ for(let x=-10;x<W;){const w=50+rnd()*60,h=110+rnd()*140;c.fillStyle='#1b0b2e';c.fillRect(x,GY-h,w,h);
+  for(let wy=GY-h+10;wy<GY-20;wy+=18)for(let wx=x+8;wx<x+w-10;wx+=14){if(rnd()>.55){c.fillStyle=rnd()>.5?'#ffd75e':'#ff7ad9';c.fillRect(wx,wy,7,9)}}x+=w+4}
+ const neon=(t,x,y,col,sz,rot)=>{c.save();c.translate(x,y);c.rotate(rot);c.font=sz+'px Impact,sans-serif';c.shadowColor=col;c.shadowBlur=18;c.lineWidth=3;c.strokeStyle=col;c.strokeText(t,0,0);c.fillStyle='#fff';c.globalAlpha=.85;c.fillText(t,0,0);c.restore()};
+ neon('CLUCK CLUB',70,150,'#00f0ff',34,-.05);neon('BIRD BAR',560,120,'#ff3df2',30,.04);neon('COOP',350,210,'#ffe600',26,0);
+ c.fillStyle='#241338';c.fillRect(0,GY-70,W,70);c.save();c.translate(150,GY-30);c.rotate(-.03);c.font='44px Impact';c.fillStyle='#38ff9c';c.globalAlpha=.55;c.fillText('BAWK OR DIE',0,0);c.restore();
+ for(let x=20;x<W;x+=40){c.strokeStyle='#ffffff10';c.beginPath();c.moveTo(x,GY-70);c.lineTo(x,GY);c.stroke()}
+ gr=c.createLinearGradient(0,GY,0,H);gr.addColorStop(0,'#3a2750');gr.addColorStop(1,'#14091f');c.fillStyle=gr;c.fillRect(0,GY,W,H-GY);
+ c.fillStyle='#ff3d81';c.fillRect(0,GY,W,3);c.fillStyle='#ffe60055';for(let x=30;x<W;x+=120)c.fillRect(x,GY+22,60,4)})();
+function rooster(f){const c=g,gr=f.y>=GY,c0=x=>f.flash>0?'#fff':x,C=f.c;
+ c.save();c.fillStyle='rgba(0,0,0,.4)';const sh=Math.max(.4,1-(GY-f.y)/300);c.beginPath();c.ellipse(f.x,GY+2,34*sh,8*sh,0,0,7);c.fill();
+ c.translate(f.x,f.y);c.scale(f.dir,1);if(f.ko)c.rotate(-1.45);else if(f.stun>0)c.rotate(-.18);
+ const a=f.at,p=a?a.t/a.dur:0,lg=a&&a.type=='peck'?Math.sin(p*Math.PI):0,sp=a&&a.type=='spur'?Math.sin(p*Math.PI):0;
+ const sw=gr?Math.sin(f.bob):0,idle=Math.sin(clock*8)*1.5,by=f.blk?6:0;
+ c.lineCap='round';c.lineJoin='round';
+ C.tail.forEach((col,i)=>{c.save();c.translate(-24,-62+by);c.rotate(-.25-i*.3+Math.sin(clock*5+i)*.04);c.fillStyle=c0(col);c.beginPath();c.ellipse(0,-34,8,36,0,0,7);c.fill();c.restore()});
+ c.strokeStyle=c0('#ffb400');c.lineWidth=5;
+ c.beginPath();c.moveTo(-8,-34);c.lineTo(-8+sw*12,-3);c.lineTo(-8+sw*12+10,-3);c.stroke();
+ c.beginPath();c.moveTo(8,-34);if(sp>0){c.lineTo(8+62*sp,-4-28*sp);c.lineTo(8+62*sp+10,-4-28*sp)}else{c.lineTo(8-sw*12,-3);c.lineTo(8-sw*12+10,-3)}c.stroke();
+ const bx=0,byy=-56+by+idle*.5;
+ c.fillStyle=c0(C.body);c.beginPath();c.ellipse(bx,byy,30,25,0,0,7);c.fill();
+ c.fillStyle=c0(C.light);c.beginPath();c.ellipse(10,byy+6,17,15,0,0,7);c.fill();
+ c.fillStyle=c0(C.dark);c.beginPath();c.ellipse(-6,byy+2,17,11,.4+Math.sin(f.bob*2)*.1,0,7);c.fill();
+ const hx=26+lg*34,hy=-90+by+lg*12+idle;
+ c.fillStyle=c0(C.body);c.beginPath();c.arc(20,-76+by,14,0,7);c.fill();
+ if(f.blk){c.fillStyle='rgba(120,245,255,.35)';c.strokeStyle='#7ff6ff';c.lineWidth=3;c.beginPath();c.ellipse(34,-62,20,42,0,0,7);c.fill();c.stroke();c.fillStyle=C.dark;c.beginPath();c.ellipse(20,-66,11,28,-.2,0,7);c.fill()}
+ c.fillStyle=c0('#ff1744');[[-4,-14,6],[3,-17,7],[10,-13,5]].forEach(([x,y,r])=>{c.beginPath();c.arc(hx+x,hy+y,r,0,7);c.fill()});
+ c.fillStyle=c0(C.body);c.beginPath();c.arc(hx,hy,14,0,7);c.fill();
+ c.strokeStyle=c0(C.band);c.lineWidth=5;c.beginPath();c.moveTo(hx-14,hy-6);c.lineTo(hx+13,hy-9);c.stroke();c.lineWidth=3;c.beginPath();c.moveTo(hx-14,hy-6);c.lineTo(hx-28,hy-1+Math.sin(clock*12)*4);c.moveTo(hx-14,hy-6);c.lineTo(hx-27,hy-9+Math.sin(clock*12+2)*4);c.stroke();
+ c.fillStyle=c0('#ffa000');c.beginPath();c.moveTo(hx+11,hy-3);c.lineTo(hx+28,hy+(lg?4:2));c.lineTo(hx+11,hy+(lg?9:6));c.fill();
+ c.fillStyle=c0('#ff1744');c.beginPath();c.ellipse(hx+10,hy+10,4,7,0,0,7);c.fill();
+ if(f.ko||f.stun>.2){c.strokeStyle='#000';c.lineWidth=2.5;c.beginPath();c.moveTo(hx+1,hy-7);c.lineTo(hx+9,hy+1);c.moveTo(hx+9,hy-7);c.lineTo(hx+1,hy+1);c.stroke()}
+ else{c.fillStyle='#fff';c.beginPath();c.arc(hx+5,hy-3,4.5,0,7);c.fill();c.fillStyle='#000';c.beginPath();c.arc(hx+7,hy-3,2.3,0,7);c.fill();c.strokeStyle='#000';c.lineWidth=3;c.beginPath();c.moveTo(hx-1,hy-11);c.lineTo(hx+11,hy-5);c.stroke()}
+ c.restore()}
+function txt(s,x,y,sz,fill,stroke,al='center'){g.font=sz+'px Impact,"Arial Black",sans-serif';g.textAlign=al;g.lineJoin='round';if(stroke){g.lineWidth=sz/6;g.strokeStyle=stroke;g.strokeText(s,x,y)}g.fillStyle=fill;g.fillText(s,x,y)}
+function bar(f,x,right){const w=320,h=24,y=20;g.fillStyle='#000a';g.fillRect(x-4,y-4,w+8,h+8);const v=f.hp/100,l=f.lag/100;
+ const fill=(r,col)=>{g.fillStyle=col;g.fillRect(right?x+w-w*r:x,y,w*r,h)};fill(l,'#ffe600');fill(v,v>.5?'#38ff9c':v>.25?'#ff9d00':'#ff2e4d');
+ g.strokeStyle='#fff';g.lineWidth=2;g.strokeRect(x-4,y-4,w+8,h+8);txt(f.n,right?x+w:x,y+h+24,20,'#fff','#000',right?'right':'left');
+ for(let i=0;i<2;i++){g.fillStyle=i<f.wins?'#ffe600':'#0008';g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(right?x+16+(1-i)*0+ (right?0:0)+ (right?i*26:i*26)-(right?0:0)+(right?0:0),y+h+52,9,0,7);g.fill();g.stroke()}}
+function render(){
+ g.save();g.clearRect(0,0,W,H);if(shake>0)g.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);g.drawImage(bg,0,0);
+ g.fillStyle='rgba(255,255,255,'+(.03+.03*Math.sin(clock*30))+')';g.fillRect(0,0,W,GY);
+ const a=P1.y<P2.y?[P2,P1]:[P1,P2];a.forEach(rooster);
+ for(const p of parts){if(p.t=='s'){g.strokeStyle=p.c;g.lineWidth=3;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x-p.vx*.04,p.y-p.vy*.04);g.stroke()}
+  else if(p.t=='f'){g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.globalAlpha=Math.min(1,p.l);g.beginPath();g.ellipse(0,0,10,4,0,0,7);g.fill();g.restore()}
+  else{g.globalAlpha=Math.min(1,p.l*2);txt(p.s,p.x,p.y,34,p.c,'#000');g.globalAlpha=1}}
+ const amp=3+shake*.6;g.fillStyle='#0d0418';for(let i=0;i<22;i++){const x=i*38+10,y=442+Math.sin(clock*6+i*1.7)*amp;g.beginPath();g.arc(x,y,17,0,7);g.fill();g.fillStyle=i%2?'#ff3d8199':'#00f0ff77';for(let j=-1;j<2;j++){g.beginPath();g.arc(x+j*7,y-17,5,0,7);g.fill()}g.fillStyle='#0d0418'}
+ g.restore();
+ if(st=='title'){g.fillStyle='#000a';g.fillRect(0,0,W,H);const gr=g.createLinearGradient(0,60,0,170);gr.addColorStop(0,'#ffe600');gr.addColorStop(1,'#ff3d81');g.save();g.translate(400,130);g.rotate(-.04);g.scale(1+Math.sin(clock*4)*.02,1+Math.sin(clock*4)*.02);txt('COCK FIGHTS',0,0,104,gr,'#1a0533');g.restore();
+  txt('2 PLAYERS  •  1 DEVICE  •  NO MERCY',400,172,22,'#00f0ff','#000');
+  g.globalAlpha=.5+.5*Math.sin(clock*6);txt('PRESS ENTER OR TAP TO FIGHT',400,225,28,'#fff','#000');g.globalAlpha=1;
+  txt('P1: A D move • W jump • S shield • F peck • G spur',400,262,17,'#ffc14d','#000');txt('P2: ← → move • ↑ jump • ↓ shield • K peck • L spur',400,284,17,'#8fd8ff','#000');txt('FIRST TO 2 ROUNDS',400,306,16,'#fff','#000');
+  P1.x=190;P2.x=610;P1.y=P2.y=GY-40;rooster(P1);rooster(P2);P1.y=P2.y=GY;return}
+ bar(P1,30,false);bar(P2,450,true);
+ g.fillStyle='#000c';g.fillRect(364,12,72,50);g.strokeStyle='#ffe600';g.lineWidth=3;g.strokeRect(364,12,72,50);txt(Math.max(0,Math.ceil(time)),400,54,40,time<10?'#ff2e4d':'#fff');
+ // wins dots (redraw cleanly)
+ [[P1,36],[P2,764]].forEach(([f,x],n)=>{for(let i=0;i<2;i++){g.fillStyle=i<f.wins?'#ffe600':'#0008';g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(n?x-i*26:x+i*26,100,9,0,7);g.fill();g.stroke()}});
+ if(st=='intro'){if(stT<1.3)txt('ROUND '+round,400,230,80,'#fff','#ff3d81');else{const s=1+Math.max(0,1.6-stT)*2;g.save();g.translate(400,230);g.scale(s,s);txt('FIGHT!',0,0,100,'#ffe600','#ff2e4d');g.restore()}}
+ if(st=='ko'){const[m,w]=endMsg.split('|');const s=1+Math.max(0,.4-stT)*3;g.save();g.translate(400,200);g.scale(s,s);txt(m,0,0,110,'#ff2e4d','#fff');g.restore();if(stT>.8)txt(w,400,262,36,'#ffe600','#000')}
+ if(st=='over'){g.fillStyle='#000b';g.fillRect(0,0,W,H);const w=P1.wins>P2.wins?P1:P2.wins>P1.wins?P2:null;txt(w?w.n:'NOBODY',400,190,90,w?w.c.body:'#fff','#fff');txt(w?'IS THE CHAMPION!':'DRAW - EVERYBODY LOSES',400,245,40,'#ffe600','#000');
+  g.globalAlpha=.5+.5*Math.sin(clock*6);txt('ENTER OR TAP FOR REMATCH',400,310,28,'#fff','#000');g.globalAlpha=1}}
+let last=performance.now();
+function loop(ts){const dt=Math.min(.033,(ts-last)/1000);last=ts;step(dt);render();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script></body></html>
